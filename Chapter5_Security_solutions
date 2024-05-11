@@ -1,0 +1,321 @@
+## Solutions
+
+##### Exercise 5.1{-}  
+Personal Health Information (PHI) records are extremely detailed and comprehensive and thus among the most valuable data assets. It has been calculated that up to \$408 is paid per PHI record on the black market (@Eddy2019), and the consequences of a PHI data breach for the patient can be devastating:
+
+* *Emotionally*, the incident will be a very stressful experience.
+  
+* *Medical identities* can be used to purchase medical items, undergo treatment and pay for prescriptions. 
+  
+  Medical identity theft can be very difficult to detect, which makes it even more dangerous: forty percent (40%) of patients found out via letters from creditors for expenses that thieves incurred in their name, and over 50% of fraud victims did not discover that they were a victim until at least one year after the theft (@Experian2010).
+  
+* *Coercion and extortion:* given specific knowledge of someone's disease or terminal illness, such as a sexually transmitted disease, coercion and extortion are a possibility.
+  
+* *Health costs:* in previous PHI breaches 55% of victims had to make out-of-pocket payments to the health plan provider or insurer to restore the coverage, and 32% saw an increase in their insurance premiums (@Experian2010).
+
+* *Finance:* with access to a social security number and PHI, fraudsters can submit tax returns in the customer's name as well as open new bank accounts. It might take a long time to recover from a low credit score.
+  
+#### Exercise 5.2{-}  
+The Caesar cipher is very easy to break: Since there are only 26 possible keys, we can keep shiting the key in a brute force approach until a message that makes sense appears.
+
+Another approach to breaking the Caesar cipher relies on the known shape of the frequency distribution of the various letters in any language. We can keep rotating the key until the shape of the distribution approximates the known frequency distribution of the letters in a piece of plaintext in the chosen language. **Frequency analysis** is only bound to work with ciphertexts of a certain length.
+
+#### Exercise 5.3{-}  
+The goal of the Vigenère cipher is to confound simple frequency analysis because each letter is encrypted with a different Caesar cipher. However, if repeating words in the text align with a repeating key (and we assume that the repeated ciphertext segments represent the same segments in plaintext) then we can guess the key length and subsequently treat the ciphertext as a number of repeating Caesar ciphers. In the example below the distance between the repetitions of 'DSZO' is nine letters. Since the key length must be a factor of 9, the true key length must be either 1, 3 or 9 letters long. This strategy is called the **Kasiski Examination**. Another well-known test for determining the key length is **Friedman's test** which is a statistical test based upon the uneven distribution of the cipher letter frequencies. 
+
+```{r, out.width="65%", fig.cap="The Cryptographic Weakness Of The Vigenère Cipher Lies in the Repeating Nature Of The Key.", echo=FALSE, fig.align = 'center'}
+options(tinytex.verbose = TRUE)
+
+knitr::include_graphics("images/vigenereWeakness.jpg")
+```
+
+##### Exercise 5.4{-}  
+This is because relying on the attacker not knowing the details of the encryption method renders the system vulnerable. With persistent attackers, *security through obscurity* equates to no security at all. This is known as Kerckhoff's Principle: "if any part of a cryptosystem (except the individual secret key) has to be kept secret then the cryptosystem is not secure".
+
+Only cryptosystems that have been published (and tried to be broked into) should be trusted as the security must lie in the choice of keys. Also, from a practical point of view, what is easier, replacing a cryptographic key or devising an entirely new algorithm?
+
+##### Exercise 5.45{-}
+One cannot rely on obscurity as the sole means of achieving security, but some obscurity is critically necessary. For example, not disclosing your password or keys is essential. Obscuring source code, on the other hand, is not very effective because some of the code may be guessed and also because it prevents auditing for security. When deciding which parts of a system should be obscured we must do a cost-benefit analysis in the context of the other security layers since obscuring can give a false sense of security.
+
+#### Exercise 5.5{-}
+Some of the limitations of passwords include:
+
+* A password may be stolen by an *eavesdropper* while being typed as well as by many different types of security attacks such as **phising**, **Man-In-The-Middle (MITM)** and **keylogger attacks**.
+
+* People tend to choose very common passwords, or very complicated ones that need to be written down as they would not otherwise remember them.
+
+* Given sufficient time, a password might be guessed by an **offline attack**.
+
+* Password update requires human action, which is problematic for two reasons: (i) compromised passwords will remain valid unless a user decides to change it; (ii) most password update protocols are vulnerable to social engineering attacks such as **phishing**.
+
+##### Exercise 5.60{-} 
+The threats to privacy we must consider when backing-up the SAT users' data to a Cloud Service Provider (CSP) include (non-exhaustive list):
+
+(i) Unauthorised access to data.  
+Many different people can potentially access the data without authorisation. These include unscrupulous employees of the end users of SAT, employees of Byte Labs, Inc. or of the CSP, other tenants in the Cloud and external hackers.
+
+(ii) Authorised access to data.  
+Depending on the Privacy Policy (which might be purposefully obscure and abusive), a CSP may give away the backed-up data. This is why it is key to examine privacy policies in detail as many can be purposefully obscure and abusive. This was the case of Dropbox sharing anonymised data on 400,000 academics across 1,000 universities for a study on the collaboration patterns of the most effective versus the least effective teams (@Pah2018).  
+
+(iii) Data ownership.  
+Unless the service-level agreement (SLA) says otherwise, a CSP might very well own the data, which would have catastropthic effects for Byte Labs, Inc. and its customers. If the CSP owns the data, they could do as in (ii) above and more.
+
+An SLA is the agreement signed between the CLS and the customer (Byte Labs, Inc. in this case) where specific aspects of the service are agreed upon. These include service quality, availability and responsibilities.
+
+(iv) Data theft.  
+Data theft can easily occur if SAT is not centralised in the form of a local server at the customers' sites and the backup process is not coordinated via a thin client. For example, having employees back up their own data from their (portable) machines may easily lead to machine "theft" and the corresponding unauthorised access to data. The loss of control on information replication on multiple devices greatly increases the chances of data theft.  
+
+(v) Data loss and data corruption.  
+Data loss may occur from deficient backups if, for example, the CSP subcontracts the backups with a third party. 
+
+Moreover, low-level data corruption with complex patterns is known to happen in storage devices (@Panzer2007,@Mascetti2015) and, like data loss, it can potentially lead to private data not being recoverable. The syncing of corrupted data to all connected devices also spreads the effects. These are real privacy concerns since the CSP (and hence Byte Labs, Inc.) may be accused of not having been diligent in the protection of private data.  
+
+(vi) Lawsuits and loss of reputation and credibility.  
+Lawsuits may occur if the CSP breaches country- or region-specific data protection laws (such as the EU's GDPR cross-border data transfer laws), or if the CSP does not protect your data appropriately. This can be especially problematic if the data backup is subcontracted to an untrusted third-party. We may also get sued if our employees manage the backups and the files freely and modify or delete key files and documents by mistake, with these changes being spread to all synced devices.
+
+(vii) Government access being enforced on the CSP.  
+In such cases the privacy of our data is violated automatically.
+
+##### Exercise 5.61{-}
+In this business model Byte Labs, Inc. charges its customers for setting up an automatic backup procedure of their SAT contents onto a public cloud, with the actual storage costing nothing or very little. Here there would be huge privacy concerns because the data will not necessarily be encrypted by the CSP since the business model for the public cloud provider will most certainly be the mining and use (and reselling of aggregate) data for targeted advertising purposes (Solove's *information processing*). Data resale to business competitors by unscrupulous employees of Byte Labs, Inc. is also a possibility. 
+
+##### Exercise 5.62{-}
+The outline of one possible solution is presented below:
+
+* The customer is responsible for encrypting their own data and sending it to the public storage cloud. Byte Labs, Inc. can facilitate this step by installing a thin client at the customer's premises that automates the entire process except for the authentication part.
+  
+* For efficiency reasons, since symmetric cryptography is faster than public key cryptography, the data to be backed up is encrypted using a symmetric key.
+  
+* This symmetric encryption key must never rest with the CSP so as to prevent unauthorised access to data. Leaving the symmetric encryption key in the hands of the end user is also a potential risk because most small and medium-sized companies lack an IT department with the necessary competence for handling and protecting private keys.
+
+The data backup protocol is as follows:
+
+1. Every time the customer (C) wants to back up theur data, they should first generate a private-public key pair for asymmetric encription, *sk(C)* and *pk(C)*. This can be done through the thin client and there should be a public key certificate (PKC) issued by a certificate authority (CA).
+
+2. The customer (C) requests the private key for symmetric encryption from Byte Labs, Inc. (BL) by handing the public key *pk(C)* they have just generated. Byte Labs, Inc. then checks the PKC, and if the certificate belongs to one of their users, Byte Labs, Inc. then generates a private, symmetric key, *k(BL,C)* for this specific end user and instance. Like this Byte Labs, Inc. can always map a symmetric key to a customer, dataset (backup instance) and date. The private key *k(BL,C)* is encrypted with the customer's public key and sent back to them.
+
+3. Once the customer receives the symmetric key, *k(BL,C)* from Byte Labs, Inc. it is decrypted with the customer's private key, *sk(C)*, from the public-private key pair they generated at the start of the protocol. The symmetric key sent over by Byte Labs, Inc. is now used to symmetrically encrypt the data to be backed up and sent to the CSP for storage. Once the storage is completed, the customer's thin client deletes the private key *k(BL,C)*. This must be done to prevent misuse of the private key by any unauthorised intruder on the customer's system.
+
+```{r, out.width="100%", fig.cap="A Plausible Solution for Backing Up the Data in Encrypted Format.", echo=FALSE, fig.align = 'center'}
+options(tinytex.verbose = TRUE)
+
+knitr::include_graphics("images/backupProtocol.jpg")
+```
+
+#### Exercise 5.7{-}
+The entropy of the 24-character 'yardfueloptimalplausible' (a 26 lower-case letters alphabet) is log~2~(26^24^) = 112.8 bits. At a conservative rate of 100 billion passwords and taking into account not hours but years (365 days = 31536000 hours), the same calculation as above yields 802,142 million years (over 800 billion years ).
+
+Despite seeming secure, the password is made up of very common words that may be found in a standard dictionary, and here the entropy of each word might be calculated as log~2~(2000) = 11 bits. This gives us a total of 44 bits (11 + 11 + 11 + 11) of entropy for this password made up of common words. Therefore the password 'Cv$67#aX' (50 bits) is shorter but more secure than 'yardfueloptimalplausible'. 
+
+For this reason Bruce Schneier's recommendation is to choose a sentence that you can easily remember and transform it in a non-obvious way ^[https://t.ly/jaTtS]. For example if we mutate the sentence 'when I was seven, my sister threw my stuffed rabbit in the toilet' to 'WIw7,mstmsritt...', and assume a 78-character alphabet then the latter password has an entropy of nearly 107 bits (log~2~(78^17^)).
+
+##### Exercise 5.6{-}
+An email password needs to be more complex because it only fulfils the *what you know* identification factor, whereas the PIN for your ATM card combines *what you have* (the card) and *what you know* (the 4-digit PIN). In theory this gives a thief a chance of 3/10000 if the card gets swallowed after three failed attempts. In practice, however, the chances for the attacker are even better because of our own behavioural bias when choosing short passwords: Research on a database of 3.4M exposed passwords showed that the choice of 4-digit passwords never follows an even distribution as '1234' is chosen by 10.7% of users, followed by '1111' (6.0%) and '0000' (1.9%) (@PINanalysis). This behavioural bias favours the attackers, although in practice having a 4-digit password and the card swallowed after three failed attempts is a good compromise between a secret that is short enough to be recalled and something that is rather secure.
+
+##### Exercise 5.63{-} 
+The collection of keys must be properly protected by encryption and stored safely. For this Byte Labs, Inc. may use a Hardware Security Module (HSM) server. An HSM is a plug-in device where the keys can be stored long-term in an encrypted form. Keys can never leave the machine, except by using a connecting API (which would involve an extra layer of machine-machine authentication). Therefore, an HSM would be a good choice for the permanent storage of keys because HSMs offer both logical (e.g. secure cryptography using random generators) and physical protection of keys. HSMs are hard to hack into and also have hardware tamper protocols that become activated whenever they are broken into.
+
+##### Exercise 5.64{-}
+Given the design and protocol above, the reverse process could be implemented. The customer should contact Byte Labs, Inc. via the application on the thin client and request the symmetric key for a specific date (backup month, for instance). The customer would have to generate a new public-private key pair so that Byte Labs, Inc. can send back the private (symmetric) key properly encrypted using the customer's new public key. The backup for a specific date can be then downloaded from the CSP and decrypted using the same symmetric key that was used for encrypting it in the first place. 
+
+##### Exercise 5.66{-}
+(i) Unauthorised access to data.  
+This issue has been partly addressed because if the backup data is encrypted and the encryption keys are not easily accessible, the target then becomes less attractive. A few outstanding concerns include:
+
+* Anonymisation of personal data.  
+Prior to migrating the data to the public cloud (and even if the data are encrypted) the SAT system should be able to anonymise the data properly beyond removing personal names (risk avoidance).  
+This is not a bullet-proof strategy as it has been shown that for large datasets only limited information is required to identify individuals. For instance, using the 1990 US Census summary data Latanya Sweeney showed that by combining postcode, gender and date of birth it was possible to identify 87% of the US population (or 216 million) (@Sweeney2000). Later in 2013 Sweeney and co-workers showed again that up to 97% of publicly available participant profiles in the Personal Genome Project could be identified by combining again their postcode, gender and date of birth (@Sweeney2013).
+
+* Typical cloud vulnerabilities.  
+This is still a risk that can lead to unauthorised access to data. Cloud vulnerabilities include virtual exploits or tampering with the hypervisor, over which the end-user or the consumer have no control. Trust on the provider and a record of former issues (and their management) are key here.
+
+* Incomplete data deletion.  
+Unauthorised access to data can still also happen at a later date due to incomplete data deletion on the part of the CSP and the reallocation of memory resources.
+
+(ii) Authorised access to data.  
+The encryption of backups does not change the Privacy Policy of the CSP, but at least it makes the customer data more difficult to use. It is essential to analyse in detail the privacy policies of all potential storage services. Moreover, the Privacy Policy may be changed at some point and Byte Labs, Inc. and its customers might get locked in.
+
+(iii) Data ownership.  
+This point has not been addressed by the proposed design because data ownership has to do with the SLA and not with encryption. It would be necessary for Byte Labs, Inc. to agree on a specific SLA with the public cloud provider that allows the customer to retain ownership of their data.
+
+(iv) Data theft.  
+Encryption does not necessarily solve this problem if the SAT service is not centralised. The use of a thin client to coordinate the backups helps minimise the risk of data theft.
+
+(v) Data loss and data corruption.  
+The issue of data loss in the cloud storage remains unresolved as it partly relies on the storage provider using high-quality storage and implementing data integrity controls (e.g. checksums) to make sure that lost or corrupt data are replaced with a redundant copy of the original. However, a centralised SAT server and the introduction of a thin client to carry out the backups in a coordinated manner should end the issue of losing data from changes to files and folders that are spread across all synced devices.
+
+(vi) Lawsuits and loss of reputation and credibility.  
+Lawsuits derived from non-compliance with specific laws (e.g. GDPR) remain an issue which can nevertheless be addressed in the SLA. The issue of employees having open access to managing backups and files, which can potentially violate privacy agreements can be resolved by having a thin client that coordinates the backups. The thin client can also automatically filter out information that should not be kept in backups anymore, such as former employee data that can only be held in a specific file and format for a specified time. 
+
+(vii) Government access.  
+The proposed design does not address this issue either. If the local laws allow us to store data across borders the CSP should be at least in a privacy-friendly country. However, if the government forces the CSP to disclose the data for any reason, there is nothing we can do, but if they do not have the encryption keys and cannot force you to hand them over, then there is not that much they can do either.
+
+##### Exercise 5.68{-}
+From the point of view of the customer, the service model is Software-as-a-Service (SaaS) because Byte Labs, Inc. would be managing SAT and providing access to it over the internet. SAT would be hosted on a server that belongs to the CSP, and the customers are not responsible for neither hardware of software updates. Here the **cloud services provider (CSP)** is whoever Byte Labs, Inc. makes a deal with (e.g. Amazon Web Services), the **cloud consumer** is Byte Labs, Inc. and the **end users** are Byte Labs, Inc.'s customers (for whom the provider is Byte Labs, Inc.).
+
+From the point of view of the CSP the service model is IaaS because the CSP provides low-level resources to Byte Labs, Inc. (the consumer) to develop, implement and scale SAT, and also to store data related to its use by the end-consumers.
+
+The deployment model is a public cloud. The infrastructure is located outside the cloud consumers' and end users' premises. The CSP rents space and computing power to Byte Labs, Inc., who in turn charges the end users for access to SAT. This will expand the use of SAT to whoever wants to use it irrespective of whether users belong to broad organisations.
+
+##### Exercise 5.70{-}
+Customers will have to authenticate on the cloud server for gaining access to SAT. An assumption here is that the integrity of network communication is protected by an encryption-based Internet security protocol such as Transport Layer Security (TLS).
+
+As to the actual 2FA protocol, the actors are Alice (A) and the SAT server on the cloud (S):
+
+1. Alice seeks access to the SAT service in the cloud by requesting a nonce. The server (S) sends a nonce (Ns) back.
+
+  $A -> S: id(A),{"Please\ issue\ a\ nonce"}$
+
+  $S -> A: id(S),Ns$
+
+The implementation could be a simple web interface where Alice requests logging in by clicking on a button once. A nonce is then generated for the session and sent back (unhashed) through the web interface. The reason for using a nonce is to prevent replay attacks as nonces can only be used once. Ideally the nonce should be statistically unique and unpredictable, with limited *freshness* (timestamp-bound, for example).
+
+2. Alice logs in by inputting the nonce plus her username and password. This is the first factor:
+
+  $A -> S: id(A),h(Ns + password)$
+
+Here Alice's id can be in plaintext, but Ns and password are hashed before they are sent back to S. The nonce may be intercepted but the hash of nonce + password are only known to the server. Thus, Alice's password is never revealed. Since the server knows the nonce it has just sent to Alice, it can easily compare Alice's message against its stored combination of hashed nonce + password from all users. The user passwords in a server must always be stored as password digests (i.e. hashed), not plaintext.
+
+3. Following the correct first identification of Alice, S then sends a time-based One-Time Password (TOTP) to Alice's phone, which is essentially a password that Alice gets based on the time of the day.
+
+  $S -> A: id(S),\{TOTP\}_K(A,S)$
+
+Specifically, Alice must have previously installed an application on her phone built by Byte Labs, Inc. and which allows her to receive TOTPs. The TOTP is sent over encrypted by a symmetric key, K(A,S), that is shared by S and the application on Alice's phone. This key must be confirmed ahead of time, agreed for example during app set-up and must not be derivable in any way. The phone application must also have been tested for software security before deployment, and its installation must follow an authentication procedure. For Alice to open this application, another authentication step is required (e.g. a fingerprint, or a secret digit code).
+
+4. Alice inputs the decrypted TOTP in the SAT web interface, which is then hashed and sent back to S.
+
+  $A -> S: id(A),h(TOTP)$
+
+5. Upon successful identification of the second authentication factor (TOTP), S grants Alice access to SAT in the cloud.
+
+##### Exercise 5.71{-}
+First of all, not everyone carries their tokens on them all the time but they always do have their phones on them. Moreover, whereas people may eventually share tokens, they very rarely share their phones. Even if a phone is momentarily shared, Alice is unlikely to give away the code to unlock her phone
+
+##### Exercise 5.715{-}
+For one thing, biometrics are not identical every day, or over time for the same person, and therefore we would have to place much trust on the reliability of the biometric system and their calibration of the FP/FN rate. Very reliable biometric identification systems are still too expensive for most small and medium-sized enterprises and they might still not do the job: Fingerprint casts have been reported to bypass every smartphone fingerprint recognition technology (@Goicoechea2017), even by master fingerprints (@Roy2017). Iris scans are preferable over fingerprints because they possess hundreds of unique features. Iris scans are thus regarded as the more secure form of biometric authentication (@Dimitrov2017), but the Samsung S8 iris scanner has been bypassed by putting a high-resolution picture of someone's iris (taken at a distance of 15m) over a wet lens and presenting it to the phone's scanner (@Morales2019).  
+
+Drawing a secret on a mobile phone’s touch screen is also an attractive idea that might offer enhanced security by incorporating the behavioural side of biometrics, but it is not unbreakable if the attacker knows the secret and only has to draw it (@Nguyen2017).  
+
+Implementing any form of biometric authentication seemed too expensive and complicated in this context while opening up the hardware and software faults of hundreds of mobile phones at the same time. Therefore it is difficult find a justification for using biometrics as the second authentication factor in the context presented here - SAT being used by SMEs to handle administration data.
+
+##### Exercise 5.72{-}
+A *salt* is a random value generated for each password (e.g. 'ef35xy_'), whereas *pepper* is also a random value but which is shared with the server. A salt is unique for each user and password combination, whereas the pepper can be the same for all users in the database of passwords.
+
+The advantage of adding salt and pepper to Alice's password is that the probability of a hash value being found in a precalculated table (offline attack) becomes much smaller. This might happen because one cannot stop people from having passwords like 'abc123' and an adversary might get hold of the list of hashed passwords to try to crack the first authentication step within the time allowed by the timestamp. Adding salt and pepper to the nonce and the password makes it very difficult for the attacked to crack the first authentication factor.
+
+##### Exercise 5.74{-}
+We can prevent online password hacking (or multiple login attempts) by implementing *exponential backoffs* and eventually *blacklisting*. This would be an inexpensive and efficient way for a small company to find out if their system has been compromised at this stage by a man-in-the-middle (MITM) attack.
+
+##### Exercise 5.76{-}
+For one thing, not everyone carries physical tokens on them all the time but almost everyone has their mobile phone on them. Moreover, whereas people may eventually share tokens (thus invalidating the concept that knowledge equals identity), they very rarely share their phones. Even if a phone is momentarily shared, Alice is unlikely to give away her code to unlock her phone.
+
+Also phones normally synchronise their timestamps via a standard Network Time Protocol (NTP), which is as aeefective and simpler than HMAC-based one-time password (HOTP), another one-time password (OTP) algorithm that is more commonly associated with tokens.
+
+##### Exercise 5.77{-}
+Implementing an ACL is not appropriate because by definition an ACL has to be readable, and if it is readable it can easily be attacked in the Cloud by a malicious employee of the CSP. If an attacker has access to the ACL they could easily change the permissions, add new users and login as the new user and even delete documents. 
+
+##### Exercise 5.775{-}
+This is an example of a naive key-based AC system where a document is encrypted using one key, and a key may be used to encrypt more than one document. Access to the encrypted documents is given by distributing the keys to whoever needs them. This scheme is problematic because a given key may be used to encrypt more than one document. Besides, the fact that a key may be kept by multiple people (whoever needs access to a given document) leads to huge accountability and revocation problems, does not scale well and makes it difficult to enforce corporate policy.
+
+##### Exercise 5.777{-}
+Employees should be able to access their own file only, on which they may only read (R) on every field, except for 'holidays' and 'sick leave' which they may also write (R/W). Managers/owners can access all employee files (like HR) but their rights are slightly different: Managers and owners may only write on the other employees' 'salary/status' and 'performance' fields, where HR can read and write on any field. Finally, since managers and owners are also employees they can also read and write their own 'holidays' and 'sick leave' fields, although in the table below the permissions of managers and owners are depicted with respect to the files of other employees.  
+
+The three different roles (employee, HR and owner/manager) have differential access to each entry and therefore it is not possible to give simple Access Control as in 'this role can do read and write, this other role can only read' as the situation is a bit more complex as shown in the table below.
+
+```{r, out.width="90%", echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+AC <- matrix(c(
+  
+  'Employee','R','R','R/W','R/W','R',
+  'HR','R/W','R/W','R/W','R/W','R/W',
+  'Owner/Manager','R','R/W','R','R','R/W'),ncol=6,byrow=TRUE)	
+
+AC <- as.table(AC)
+colnames(AC) <- c('Roles','Employee ID','Employee salary/Status','Holidays','Sick leave','Performance')
+rownames(AC) <- NULL
+
+knitr::kable(AC)
+```
+
+
+##### Exercise 5.78{-}
+&rarr; **Exercise 5.78:** Design a capability-based access control system for SAT in the Cloud. 
+
+One solution is to implement cryptographically enforced Dynamic Access Control (Crypt-DAC) (@Qi2017). This scheme provides AC without delegating complete trust to the CSP. The details of the solution are:
+
+* Access to SAT in the cloud is controlled by a Two-Factor authentication protocol (as described above).
+
+* Each personal entry (‘document’) is encrypted with a symmetric key (k), which in its simplest form may be a general key to encrypt all documents (not advised, though). The resulting cypher-document is then encrypted with a second symmetric key (l), thus creating an ‘onion layer’ type of encryption.
+
+A person wishing to access each document must possess both keys (k and l). These keys are given away to whoever needs to access each document (personal entry). We would still have to trust that while data are being accessed in the cloud they are not being read by the CSP. The plan would look something like this:
+
+```{r, out.width="90%", echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+AC <- matrix(c(
+  
+  'Katja-Leah (employee)','k, l',
+  'John (HR)','k, l, m, n, o, p,...,',
+  'Marie (Manager)','k, l, m, n, o, p,...,'),ncol=2,byrow=TRUE)	
+
+AC <- as.table(AC)
+colnames(AC) <- c('Roles','Keys')
+rownames(AC) <- NULL
+
+knitr::kable(AC)
+```
+
+Symmetric onion encryption is secure in the Cloud, appears to be faster than other methods and also scales better than other methods such as Cryptographic Cloud RBAC (less keys) (@Garrison2016). Crypt-DAC also allows the Cloud to generate the keys, which is important because role changes take work but the cloud can do the lion’s share of it. 
+
+##### Exercise 5.80{-}
+If an employee leaves and the file can be stored permanently, one can simply exchange (destroy) the secondary key *l* and re-encrypt with a permanent, new second-layer key *l’* that will be given to HR only. If an HR employee or a manager leaves then we have to change all keys, but this is not likely to be the most common case.
+
+In theory this model has limited accountability because anyone having keys *k* and *l* can access a file with read/write privileges. In order to separate the read and write functions, we would have to make two copies of each file and field, one encoded with an ‘l-R’ key and the other with an ‘l-RW’ key, but then each file instead of having two keys (*k* and *l*) would have *k* plus a much larger number of different secondary keys. This would create a scalability problem and make revocation more complicated. In practice, however, since each employee can only access their own file, and since we know how they authenticated we also know who made any changes to what. At the same time any potential damage done by a malicious employee would be limited to their own file (except for malicious HR and managers/owners who hold all the keys).
+
+##### Exercise 5.81{-}
+
+(i) Employee Alice (A) requests a nonce (Ns) to the CSP (C):
+
+  $A → C: id(A),{”Please\ issue\ a\ nonce”}$
+  $C → A: id(C),Ns$
+
+(ii) Alice logs in by inputting Ns, plus her username and password (h means ’hashed’, see below):
+
+  $A → C: id(A),h(Ns\ +\ password)$
+
+(n.b. weak passwords should be automatically rejected by the system at the time of account setup)
+
+(iii) Following the correct first identification of Alice, C sends an encrypted HMAC-based One-Time Password (HOTP) to Alice’s token:
+
+  $C → A: id(C) + \{HOTP\}_{K(A,C)}$
+
+(iv) Alice sends the token-decrypted HOTP back to the CSP. Successful identification leads to access being granted.
+
+  $A → C : id(A), h(HOTP)$
+
+##### Exercise 5.82{-}
+Nonces should have limited **freshness** (timestamp-bound, for example) and be statistically unique and unpredictable(@Koien2015).
+
+##### Exercise 5.83{-}
+Exponential backoffs and a blacklisting policy can be implemented to limit the risk of account hacking. This way of identifying multiple login attempts provides a cheap and quick way for a relatively small company like SmartDoc Ltd. to find out if their systems have been compromised by a Man-In-The-Middle (MITM) attack.
+
+##### Exercise 5.84{-}
+A straightforward way to prevent access to the app in case of phone theft is to make the app ask the user for some secret in order to grant access each time. This could be something as simple as a four-digit code that the user inputs at the time of registration.
+
+
+##### Exercise 5.130{-}
+Security should be enhanced at the local SmartDoc Ltd.'s offices by additional measures such as electronic or biometric access controls, sensor-activated alarms, CCTV and security personnel.
+
+##### Exercise 5.131{-}
+Physical security events at the CSP and third party business associates may compromise PHI **confidentiality**, **integrity** and **availability**. It is unlikely that SmartDoc Ltd. will be shown around the CSP's data centres, but at least they should have done their due diligence. The CSP's documentation should describe basic physical controls such as appropriate authentication by authorised personnel, CCTV footage, fire detection systems and security guards.
+
+
+##### Exercise 5.135{-}
+SmartDoc Ltd. needs to control whether the CSP and third party business associates are GDPR-compliant and will respect SmartDoc Ltd.'s legal requirements. PHI breaches at third party companies will make SmartDoc Ltd. legally liable. SmartDoc Ltd. must have access to the CSP's Cloud Governance Framework document detailing all the important points, as well as access to a compliance officer that is reachable.
+
+##### Exercise 5.136{-}
+We do not have operational control over the infrastructure of the cloud but at least SmartDoc Ltd. should make sure that there is a CSP **business continuity plan** and that it is realistic (GDPR Art. 32(1)(c)). The PHI must always remain available in the event of a catastrophe, and both the PHI and the platform itself should be readily migrated to another CSP without getting locked in.
+
