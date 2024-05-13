@@ -1,0 +1,19 @@
+## Solutions
+
+##### Exercise 8.1{-}
+This statement is wrong because increasing the speed from 130 Km/h to 160 Km/h will not save us twice the time as increasing the speed from 100 Km/h to 130 Km/h as we are not dealing with a linear relationship here. For instance, increasing our speed from 100 Km/h to 130 Km/h it will only save us 1.16 h (70 min):
+
+Time = $\frac{500 Km}{130 Km/h} = 3.84 h$
+
+However, increasing our speed from 130 Km/h to 160 Km/h will not save us 140 min but only 112 min (while increasing the risk of having an accident several times):
+
+Time = $\frac{500 Km}{160 Km/h} = 3.125 h$
+
+People fall for this type of reasoning because our brains find it easier to think in linear terms, which is a form of cognitive bias. It is certainly true that travelling at 200 Km/h takes half the time as travelling at 100 Km/h, but the question that we should be asking is how much time we will be saving. As shown above, however, not every situation is linear and our inability to recognise this leads to making poor decisions. As a result, most people will speed up while burning a disproportionate amount of fuel and increasing their risk of having an accident. The question they should be asking, however, is not how much they can speed but how much time they will be saving by speeding (which again is a non-linear relationship).
+
+##### Exercise 8.2{-}
+Given our tendency to think linearly it is easy to fool consumers by making them focus on a product's attributes instead of on their performance. For example, an internet service provider (ISP) may price their 25 Mbps medium-speed package at *x* euros per month, and their 50 Mbps high-speed package at *2x* euros per month. The reality, however, is that the performance of the internet connection cannot possibly be twice as good because additional factors come into play. In other words, beyond a certain bandwidth (download speed) the download time does not improve, but the price of the connection rises linearly. However unethical it is, a company may take advantage of our tendency to think that the relationship between benefits and attributes is linear.
+
+```{r, out.width="50%", fig.cap="The relationship between download speed and the time it takes to download a 1 Gb file", echo=FALSE}
+knitr::include_graphics("images/downloadSpeed.jpg")
+```
