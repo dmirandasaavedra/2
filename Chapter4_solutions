@@ -1,0 +1,770 @@
+## Solutions
+
+##### Exercise 4.1{-}
+The goal of data abstraction is to achieve **data independence**, a property that allows you to modify the database schema at one level of abstraction without having to modify the other levels. This makes the daily management (e.g. modification and alteration) of the database so much more efficient.
+
+##### Exercise 4.2{-}
+\underline{Atomicity} prevents situations like partial updates to a database (which cause data integrity problems) and incomplete transactions. As an example, let us say that an entire transaction consists of transferring money from my account to another account, and update the balance of each account. Let us pretend that a DBMS transfers money from my account to my son's school account, but a system failure occurs during the transaction and while the money is deducted from my account it never reaches its destination. If a transaction is not completed, the state before the transaction started must be re-instituted (rolled back).
+
+\underline{Consistency} prevents the inconsistent querying or modification of a relational database, for example by trying to update a record such as 'Age' with a data type that has not been described for this attribute (a constraint violation), such as using characters to describe someone's age instead of an integer.
+
+Another example of violation of a relational database's consistency would be the case of having more than one credit card per bank account. If only 100 euros are left and I withdraw 80 euros, someone else from a different ATM should not be able to withdraw more than 20 euros following my transaction (a violation of the **strong consistency** that is of paramount importance in banks).
+
+\underline{Isolation} prevents transactions from interfering with each other. For example, if there is only one seat left in a particular flight and two people are trying to book it the DBMS should first execute one of the transactions to completion. 
+
+\underline{Durability} ensures data recovery in the event of system failure. For example, in the event of a blackout if any update or modification to a database is stored in the disk of the database server we should be able to recover 100 per cent of the data. Being able to reconstruct all transactions is of crucial importance in organisations such as banks, the stock exchange and hospitals.
+
+##### Exercise 4.3{-}
+Blockchain technology represents an extreme case of a distributed network as no single machine or organisation can own the chain. The ledger is distributed via the nodes connected to the chain, and a node can be any type of electronic device that is capable of keeping a copy of the chain. Thus, partition failure is inherent to blockchain technology design and here the CAP Theorem really does apply.
+
+If we choose Availability over Consistency, every request receives a response even if the network cannot guarantee that the data is up-to-date. In such a large, worldwide distributed network the data will be inconsistent most of the time. 
+
+Choosing Consistency over Availability will result in a highly consistent database that will be down most of the time due to system errors and time-outs.
+
+Here Availability should be prioritised over Consistency because otherwise the network would not be functional. The downside is that the completion of a blockchain currency transaction cannot be guaranteed. The way that Bitcoin solves this problem is as follows: any given transaction is instantly relayed all over the world, which makes it difficult to reverse. Then within a few minutes on average the transaction will be inserted in a block, and 99.99% of the blocks make it into the blockchain. If a transaction is inserted into a block that does not become part of the blockchain, the process is re-started until the transaction becomes part of the blockchain. Therefore, given sufficient time consistency is eventually achieved.
+
+##### Exercise 4.4{-}
+a) Employee - Project: many-to-many because an employee can be assigned to many projects and a project can have many different employees working on it.
+
+b) Wife - Husband: one-to-one except in societies where polygamy is allowed.
+
+c) Scientist - Invention: one-to-many because a scientist can make many inventions but each invention is done by one specific scientist (we are excluding inventions that result from collaborative work).
+
+d) Student - Calculus II: one-to-many because each student can enrol only once in this specific course per semester, but this course can have many students.
+
+
+##### Exercise 4.5{-}
+The reasons why this table is not a relation are:
+
+(i) The third column contains a value ('?') that belongs to a data type unlikely that of the other values in the column (numeric).
+
+(ii) The first and the third columns are called the same; since column order does not matter in relations but their naming does, it is not possible to distinguish between the two.
+
+(iii) The missing value in column B introduces ambiguity (is it a null?) when all the values in the column should belong to the same data type.
+
+(iv) All the values in the first column are unique, but since the first column cannot be distinguished from the third column by name, we cannot have a primary key.
+
+Note: this table is nevertheless supported by SQL, and the reasons outlined above illustrate some of SQL’s serious and far-reaching deviations from relational theory.
+
+##### Exercise 4.6{-} 
+For the same amount of storage and without needing the flexibility of VARCHAR(), CHAR(1) is the faster option.
+
+##### Exercise 4.7{-}  
+Table A violates 2NF.
+Table B violates 1NF.
+Table C violates 3NF.
+
+##### Exercise 4.8{-}  
+a) The entry for 'Italy' is deleted.
+
+```{r, echo=FALSE, eval=TRUE}
+library(kableExtra)
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'Spain','Madrid','47000000','Europe',
+  'Mexico','Mexico City','115000000','America',
+  'Australia','Sydney','68000000','Oceania',
+  'United Kingdom','London','67000000','Europe'),ncol=4,byrow=TRUE)
+
+tb <- as.table(tb)
+colnames(tb) <- c('Country','Capital','Population','Continent')
+rownames(tb) <- NULL
+
+knitr::kable(tb,booktabs = TRUE, valign = 't') %>% kable_styling(full_width = F, position = "center", latex_options = "HOLD_position")
+```
+
+b) The contents of the table are deleted, but not the table itself.
+
+```{r, echo=FALSE, eval=TRUE}
+library(kableExtra)
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  '','','',''),ncol=4,byrow=TRUE)
+
+tb <- as.table(tb)
+colnames(tb) <- c('Country','Capital','Population','Continent')
+rownames(tb) <- NULL
+
+knitr::kable(tb,booktabs = TRUE, valign = 't') %>% kable_styling(full_width = F, position = "center", latex_options = "HOLD_position")
+```
+
+c) The table is deleted. 
+
+##### Exercise 4.9{-}  
+* NOT NULL - a column cannot contain NULL values
+* UNIQUE - repetition of values in columns is not allowed
+* PRIMARY KEY - a column of values that are both UNIQUE and NOT NULL which uniquely identifies each tuple (row) in a relation
+* FOREIGN KEY - a column of identifiers that link one relation to another and which, together with primary keys, are fundamental for referential integrity
+* CHECK - ensures that the values in a column satisfy a given condition
+* DEFAULT - sets a default value for a column unless another value is provided
+* CREATE INDEX - creates indexes in tables, which are invisible to users but needed for speeding up queries.
+
+In the example below foreign keys are IMO, ORIGIN and DESTINATION. The IMO (International Maritime Organization) number is a 10-digit identification system for marine vessels that remains unchanged throughout the lifetime of a vessel. The LOCID code corresponds to location-specific identifier.
+
+CREATE TABLE SHIP_LOCATION (
+   locid VARCHAR(20) NOT NULL **PRIMARY KEY**,
+   imo CHAR(10) NOT NULL UNIQUE **REFERENCES SHIPS(IMO)**,  
+   time TIMESTAMP NOT NULL,
+   lat SMALLINT CHECK (lat between -90 AND 90),
+   long SMALLINT CHECK (long between -180 AND 180),
+   origin VARCHAR(6) NOT NULL **REFERENCES PORTS(PORTID)**,
+   destination VARCHAR(6) NOT NULL **REFERENCES PORTS(PORTID)**,
+   course SMALLINT CHECK (course between 0 AND 359),
+   speed SMALLINT CHECK (speed between 0 AND 60),
+   status BOOLEAN DEFAULT TRUE
+   ); 
+
+##### Exercise 4.10{-}  
+a) 
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  
+  '1','x','x','1',
+  '1','x','x','2',
+  '1','x','NULL','3',
+  '2','y','x','1',
+  '2','y','x','2',
+  '2','y','NULL','3',
+  'NULL','z','x','1',
+  'NULL','z','x','2',
+  'NULL','z','NULL','3'),ncol=4,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B','B','C')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+b) 
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  
+  '1','x','x','1',
+  '1','x','x','2',
+  '1','x','NULL','3',
+  '2','y','x','1',
+  '2','y','x','2',
+  '2','y','NULL','3',
+  'NULL','z','x','1',
+  'NULL','z','x','2',
+  'NULL','z','NULL','3'),ncol=4,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B','B','C')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+c)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  
+  '2','y','x','1'),ncol=4,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B','B','C')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+d)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  
+  '1','x','1',
+  '1','x','2'),ncol=3,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B','C')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+e) 
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  
+  '1','x','x','1',
+  '1','x','x','2',
+  '2','y','NULL','NULL',
+  'NULL','z','NULL','NULL'),ncol=4,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B','B','C')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+
+##### Exercise 4.11{-}  
+a) 12
+
+b) 1.714286
+
+c) 1
+
+d) 3
+
+e) 
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'x','2',
+  'y','4',
+  'z','3',
+  'NULL','3'),ncol=2,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','SUM(B)')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+f)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'x','1',
+  'y','2',
+  'z','3',
+  'NULL','1.5'),ncol=2,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','AVG(B)')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+g)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'x','1',
+  'y','2',
+  'x','1',
+  'y','2',
+  'z','3'),ncol=2,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A','B')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+h)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'x',
+  'y',
+  'x',
+  'y',
+  'z'),ncol=1,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+i)
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+rm(tb)
+tb <- matrix(c(
+  'x',
+  'y',
+  'x',
+  'y',
+  'z'),ncol=1,byrow=TRUE)	
+
+tb <- as.table(tb)
+colnames(tb) <- c('A')
+rownames(tb) <- NULL
+
+knitr::kable(tb)
+```
+##### Exercise 4.12{-}  
+Here we must first envisage the tables we could build to represent all the information required, and then think about their normalisation. Once we have a set of tables with primary and foreign keys we can represent the entire model.
+
+Luckily the description of the database requirements maps quite naturally to distinct relations. Thus we may define the tables below. Remember that each table must be accompanied by a description of its attributes.
+
+This exercise requires some research on, for example, the nature of the different ship identifiers. You may not be given the time to undertake all this research (like we show below), but you should be able to ask anything that is unclear as this is part of the thought process.
+
+**General description:** The ShipDB database stores information about the world's operating vessels, their location at sea as well as ports of origin and destination. ShipDB contains five tables with the following data (primary keys are underlined):
+
+* Table SHIPS ($\text{\underline{IMO}}$, MMSI, SHIPNAME, PORTREGISTRY, SHIPOWNER)
+This table stores one row for every ship, which are identified by their worldwide-unique IMO codes. The MSSI is less unique than IMO identifiers. In practice, IMOs are not perfectly unique either. For the purpose of this exercise, however, we make the assumption that IMO codes are unique identifiers as this was the original intention behind their implementation. Table SHIPS has the following fields:
+
+- IMO is a 10-digit unique identifier that identifies a vessel, in a manner that is analogous to licence plates on cars. The column data type is INTEGER and must not contain nulls. 
+
+- MMSI is the Maritime Mobile Service Identity. The column data type is INTEGER and must not contain nulls.
+
+- SHIPNAME is an alphanumeric string that contains the name of the vessel. The column data type is VARCHAR and must not contain nulls.
+
+- PORTREGISTRY is an alphanumeric string containing a UN/LOCODE identifier of the port of registry of a vessel. The column data type is VARCHAR and must not contain nulls.
+
+- OWNER is an alphanumeric string encoding the ship owner of a vessel. The column data type is VARCHAR and must not contain nulls.
+
+- SQL code:
+
+DROP TABLE IF EXISTS SHIPS;
+
+CREATE TABLE SHIPS ( \
+   IMO CHAR(10) NOT NULL, \
+   MMSI INTEGER NOT NULL, \
+   SHIPNAME VARCHAR(40) NOT NULL, \
+   PORTREGISTRY VARCHAR(6) NOT NULL **REFERENCES PORTS (PORTID)**, \
+   OWNER VARCHAR(6) NOT NULL **REFERENCES SHIPOWNER (OWID)**, \
+   **PRIMARY KEY** (IMO) \
+   ); \
+   
+* Table SHIPOWNER ($\text{\underline{OWID}}$, OWNERNAME, COUNTRY, CITY, ISCOMPANY)
+
+This table stores the owners of vessels worldwide. It has one row for every ship owner. The attributes are as follows:
+
+- OWID is an alphanumeric string encoding a unique internal identification for ship owners. Possible values are OW1, OW2,..., OW(n). The column data type is VARCHAR and must not contain nulls.
+
+- OWNERNAME is an alphanumeric string storing the name associated with each entry in the OWID field. The column data type is VARCHAR and must not contain nulls.
+
+- COUNTRY is an alphanumeric string detailing the country of registration of a ship owner. The column data type is VARCHAR and must not contain nulls.
+
+- CITY is an alphanumeric string storing the city of registration of a ship owner within a particular country as detailed in the COUNTRY field. The column data type is VARCHAR and must not contain nulls.
+
+- ISCOMPANY is a boolean value that indicates whether the ship owner is a company (True/1) or not (False/0). The column data type is BOOLEAN and must not contain nulls.
+
+Note that indicating whether a ship owner is a company (or an individual) is important because a constraint of the database is that if a ship owner is a company, then it might have a parent company. The parent company in question might have another parent company, and so on. Parent-child company relationships are modelled in a separate table called SHIPOWNERTREE.
+
+- SQL code:
+
+DROP TABLE IF EXISTS SHIPOWNER; \
+   
+CREATE TABLE SHIPOWNER ( \
+   OWID VARCHAR(40) NOT NULL, \
+   OWNERNAME INTEGER NOT NULL, \
+   COUNTRY VARCHAR(30) NOT NULL, \
+   CITY VARCHAR(30) NOT NULL, \
+   ISCOMPANY BOOLEAN NOT NULL, \
+   **PRIMARY KEY** (OWID) \
+   ); \
+   
+
+* Table SHIPOWNERTREE ($\text{\underline{OWID}}$, OWNERNAME, COUNTRY, CITY, ISCOMPANY)
+
+This table has a nested structure that reflects parent-child relationships between companies.
+
+- SQL code:
+
+DROP TABLE IF EXISTS SHIPOWNERTREE;
+
+CREATE TABLE SHIPOWNERTREE ( \
+   ID VARCHAR(6) NOT NULL, \
+   NAME VARCHAR(40) NOT NULL, \
+   PARENT_ID VARCHAR(40) REFERENCES SHIPOWNERTREE, \
+   ISCOMPANY BOOLEAN, \
+   **PRIMARY KEY** (ID) \
+   ); \
+   
+We illustrate this table briefly here: For instance, if the parent company of Wessels Befrachtungs (Kiel, Germany) is a conglomerate called BTC Enterprises, and the parent company of Viking Supply Ships AS (Oslo, Norway) is ABC Global, we can graphically represent these relationships as follows:
+
+INSERT INTO SHIPOWNERTREE (ID, NAME, PARENT_ID, ISCOMPANY) VALUES (1, 'BTC' Enterprises', NULL, TRUE);
+
+INSERT INTO SHIPOWNERTREE (ID, NAME, PARENT_ID, ISCOMPANY) VALUES (2, 'Wessels Befrachtungs', 1, TRUE);
+
+INSERT INTO SHIPOWNERTREE (ID, NAME, PARENT_ID, ISCOMPANY) VALUES (3, 'ABC Global', NULL, TRUE);
+
+INSERT INTO SHIPOWNERTREE (ID, NAME, PARENT_ID, ISCOMPANY) VALUES (4, 'Viking Supply Ships AS', 3, TRUE);
+
+* Table LOCATION ($\text{\underline{LOCID}}$, IMO, TIME, LAT, LONG, ORIGIN, DESTINATION, COURSE, SPEED)
+
+This table contains one row for every recorded position of any vessel at any point in time-space. The fields are as follows:
+
+- LOCID is a unique alphanumeric string with the format L1, L2,..., L(n) that identifies any vessel by its IMO at any point in time-space. The column data type is VARCHAR and must not contain nulls.
+
+- IMO is an integer that identifies a vessel, in an analogous way to licence plates on cars. The column data type is INTEGER and must not contain nulls. 
+
+- TIME is the date and time of the record. The column data type is TIMESTAMPZ (with time zone) and must not contain nulls.
+
+- LAT is the latitude for a given LOCID. The column data type is SMALLINT and must not contain nulls. Allowed values range from -90 to +90.
+
+- LONG is the longitude for a given LOCID. The column data type is SMALLINT and must not contain nulls. Allowed values range from -180 to +180.
+
+- ORIGIN is an alphanumeric string detailing the port of origin where a vessel departs from. It follows the UN/LOCODE naming convention. The column data type is VARCHAR and must not contain nulls.
+
+- DESTINATION is an alphanumeric string detailing the port a vessel is bound for. It follows the UN/LOCODE naming convention. The column data type is VARCHAR and must not contain nulls.
+
+- COURSE is a numeric value detailing a vessel's course for any LOCID. The column data type is SMALLINT, must not contain nulls and values allowed range from zero to 359.
+
+- SPEED is a numeric value detailing the speed of a vessel (in knots) for any LOCID. The column data type is SMALLINT and must not contain nulls. Values allowed range from zero to sixty as this covers the speed of any cargo and passenger vessels and even the majority of personal jet skis (which would not be in this database anyway). Limiting the maximum speed value is a safeguard against incorrect values.
+
+- SQL code:
+
+DROP TABLE IF EXISTS LOCATION;
+
+CREATE TABLE LOCATION ( \
+   LOCID VARCHAR(3) NOT NULL, \
+   IMO CHAR(10) NOT NULL **REFERENCES SHIPS(IMO)**, \
+   TIME TIMESTAMPZ NOT NULL, \
+   LAT SMALLINT NOT NULL CHECK (LAT between -90 AND 90), \
+   LONG SMALLINT NOT NULL CHECK (LONG between -180 AND 180), \
+   ORIGIN VARCHAR(6) NOT NULL **REFERENCES PORTS(PORTID)**, \
+   DESTINATION VARCHAR(6) NOT NULL **REFERENCES PORTS(PORTID)**, \
+   COURSE SMALLINT NOT NULL CHECK (COURSE between 0 AND 359), \
+   SPEED SMALLINT NOT NULL CHECK (SPEED between 0 AND 60), \ 
+   **PRIMARY KEY** (LOCID) \
+   ); \
+
+* Table PORTS ($\text{\underline{PORTID}}$, PORTNAME, COUNTRY)
+
+This table stores one row for every port in the world. It has the following attributes:
+
+- PORTID is a unique identifier and alphanumeric string following the UN/LOCODE naming convention. The column data type is VARCHAR and must not contain nulls.
+
+- PORTNAME is an alphanumeric string listing the name of the port its unique PORTID identifier is associated with. the column data type is VARCHAR and must not contain nulls.
+
+- COUNTRY is an alphanumeric string detailing the country of PORTID. The column data type is VARCHAR and must not contain nulls.
+
+- SQL code:
+
+DROP TABLE IF EXISTS PORTS;
+
+CREATE TABLE PORTS ( \
+   PORTID VARCHAR(6) NOT NULL, \
+   PORTNAME VARCHAR(40) NOT NULL, \
+   COUNTRY VARCHAR(40) NOT NULL, \
+   **PRIMARY KEY** (PORTID) \
+   ); \
+   
+The logical model with all the tables is as follows:
+
+```{r, out.width="100%", fig.cap="The logical ER model of ShipDB", echo=FALSE, fig.align = 'center'}
+options(tinytex.verbose = TRUE)
+
+knitr::include_graphics("images/ShipDB_logicalModel.jpg")
+```
+
+##### Exercise 4.13{-}  
+For this type of question it might be useful to use the CRISP-DM framework as a way to structuring your answer. One possible answer is as follows:
+
+"ShipDB contains both static and dynamic (location) information. I propose to mine the database to predict traffic flow through high-traffic areas. This has fundamental applications for marine surveillance as disorganized sea traffic leads to accidents and delays with large economic costs (Step 1, CRISP-DM).
+
+The next steps (2 and 3 in CRISP-DM) involve data preprocessing to improve data quality and thus the mining results. Examples are data cleaning to remove incorrect values and outliers (if unreal), exploring imputation techniques like bayesian PCA and fuzzy k-means for missing location signals, resolving inconsistencies in the data and smoothing noisy data (from faulty data collection instruments or even human error). Once quality data is available, location coordinates will have to be transformed into Cartesian coordinates using some type of projection, and most likely also standarised to a common time periodicity. Traffic flow is then calculated for the regions of interest on the Cartesian coordinate map using real-time position information. For the data modelling step (step 4), the prediction of a vessel’s position can be done by integrating multiple predictors that model various aspects of a ship’s prior behaviour. Prior to building any ML predictor, however, I would do unsupervised clustering to understand how many different patterns of speed/movement are possible, and from there probably do some form of dimensionality reduction if the entire dataset is too large. It should be possible to fit all patterns into a distinct number of clusters (k-means). Next, the estimation of a ship’s future traffic flow on the Cartesian grid will be done by using an incremental learning procedure, first by separating training and test sets from the curated dataset. The training set can be subjected to a number of predictive methods, but my first inclination would be to use an SVM given the nature of the location signal. The reporting of a ship’s location is bound to be imprecise and delayed and so there is a certain amount of oscillation about the local maxima or traffic peaks that can be approximated using specific parameters of the kernel function and the regularization parameters. This can only be manually tuned (e.g. by adding a shift term to the Gaussian kernel) and cannot be defined from the optimization problem. Step 5, CRISP-DM: The resulting prediction accuracy will have to be evaluated (e.g. by RMSE), with the advantage of SVMs over other ML methods being that SVMs are designed to minimize structural risk (as opposed to empirical risk) and SVMs are thus less vulnerable to the overfitting problem and can deal with more features. The deployment of a method to predict maritime traffic flow (step 6) will be done on a small scale first while taking note of deviations from predictions and the integration with navigation intelligence to improve sea traffic."
+
+##### Exercise 4.14{-}  
+1. List all passenger information ordered by passenger name.
+
+SELECT \* 
+FROM PASSENGERS 
+ORDER BY NAME;
+
+2. Show the origin, destination and distance of the routes with a distance greater than 500 Km, ordered by distance.
+
+SELECT ORIGIN, DESTINATION, DISTANCE
+FROM ROUTES WHERE DISTANCE > 500 
+ORDER BY DISTANCE;
+
+3. Show the route information for flights with destination MADRID and a price tag greater than 700 euros.
+
+SELECT * FROM ROUTES 
+WHERE DESTINATION='MADRID' AND PRICE>700
+
+4. Which routes have never been sold?
+
+SELECT ROUTE_CODE 
+FROM ROUTES WHERE ROUTE_CODE 
+NOT IN (SELECT ROUTE_CODE FROM TICKETS)
+
+5. List the names of all passengers who flew during March 2014.
+
+SELECT NAME FROM PASSENGERS, TICKETS 
+WHERE ID=PASSENGER_ID AND FLIGHT_DATE 
+BETWEEN '03/01/2014' AND '03/31/2014'
+
+6. What is the longest route covered?
+
+SELECT ROUTE_CODE 
+FROM ROUTES WHERE 
+DISTANCE=(SELECT MAX(DISTANCE) FROM ROUTES)
+
+7. Obtain the passenger id and any ticket identifier purchased by customers with the name 'SMITH'
+
+SELECT ID, TICKET_ID 
+FROM PASSENGERS, TICKETS 
+WHERE ID=PASSENGER_ID AND NAME LIKE '%SMITH%'
+
+8. List the names and the ticket ids for all passengers who bought a ticket to fly on aircraft 'NC76749'
+
+SELECT NAME, TICKET_ID 
+FROM PASSENGERS, TICKETS 
+WHERE ID=PASSENGER_ID AND AIRCRAFT_ID='NC76749'
+
+9. For each route show the number of tickets sold.
+
+SELECT ROUTE_CODE,COUNT(*) 
+FROM TICKETS GROUP BY ROUTE_CODE
+
+10. For the shortest route list the route and the number of tickets sold.
+
+SELECT T.ROUTE_CODE, COUNT(*) FROM TICKETS T, 
+ROUTES R WHERE T.ROUTE_CODE=R.ROUTE_CODE 
+AND DISTANCE=(SELECT MIN(DISTANCE) FROM ROUTES) 
+GROUP BY T.ROUTE_CODE
+
+11. For the least expensive route show the list of airplanes and the number of passengers that have flown on these planes.
+
+SELECT AIRCRAFT_ID, COUNT(*) FROM TICKETS T, ROUTES R 
+WHERE R.ROUTE_CODE=T.ROUTE_CODE AND 
+PRICE=(SELECT MIN(PRICE) FROM ROUTES) 
+GROUP BY AIRCRAFT_ID
+
+12. For each passenger that has listed a French landline as their telephone number (that is, any phone number starting with 0033), obtain the number of tickets purchased and the number of distinct routes flown.
+
+SELECT PASSENGER_ID,COUNT(*), COUNT(DISTINCT ROUTE_CODE) 
+FROM PASSENGERS, TICKETS WHERE ID=PASSENGER_ID 
+AND TELEPHONE LIKE '0033%' GROUP BY PASSENGER_ID
+
+13. For the aircraft(s) with the largest number of seats, show how many tickets were sold for these plane(s) in each route.
+
+SELECT AIRCRAFT_ID, ROUTE_CODE, COUNT(*) FROM TICKETS, AIRPLANES 
+WHERE AIRCRAFT_ID=AIRCRAFT_REGISTRATION 
+AND SEATS=(SELECT MAX(SEATS) FROM AIRPLANES) 
+GROUP BY AIRCRAFT_ID,ROUTE_CODE
+
+or
+
+SELECT AIRCRAFT_ID, ROUTE_CODE, COUNT(*) FROM TICKETS 
+GROUP BY AIRCRAFT_ID, ROUTE_CODE HAVING AIRCRAFT_ID IN 
+(SELECT AIRCRAFT_REGISTRATION FROM AIRPLANES WHERE 
+SEATS=(SELECT MAX(SEATS) FROM AIRPLANES))
+
+14. For each passenger show how many different routes they have flown on any one day.
+
+SELECT PASSENGER_ID, FLIGHT_DATE, COUNT(DISTINCT ROUTE_CODE) 
+FROM TICKETS GROUP BY PASSENGER_ID,FLIGHT_DATE
+
+15. For all routes longer than 1000 Km, find out the average number of tickets sold each day to specific passengers.
+
+SELECT T.ROUTE_CODE, FLIGHT_DATE, COUNT(*)/COUNT(DISTINCT PASSENGER_ID) 
+FROM TICKETS T, ROUTES R WHERE T.ROUTE_CODE=R.ROUTE_CODE AND DISTANCE > 1000
+GROUP BY T.ROUTE_CODE,FLIGHT_DATE
+
+16. For all routes shorter than 1000 Km having the same origin and destination, obtain the average, maximum and minimum price.
+
+SELECT ORIGIN, DESTINATION, AVG(PRICE), MAX(PRICE), MIN(PRICE) 
+FROM ROUTES WHERE DISTANCE < 1000 GROUP BY ORIGIN, DESTINATION
+
+17. How many tickets were sold for each route and day within the past 30 days? (The following code might be useful: DAYS(CURRENT_DATE)-DAYS(FLIGHT_DATE) <= 30).
+
+SELECT T.ROUTE_CODE, FLIGHT_DATE, COUNT(*) 
+FROM ROUTES R, TICKETS T 
+WHERE R.ROUTE_CODE=T.ROUTE_CODE AND 
+(DAYS(CURRENT_DATE)-DAYS(FLIGHT_DATE)) <= 30 
+GROUP BY T.ROUTE_CODE,FLIGHT_DATE
+
+18. Show the routes for each day whenever the average number of tickets sold to any one person is greater than 1.
+
+SELECT ROUTE_CODE,FLIGHT_DATE,COUNT (\*)/COUNT(DISTINCT PASSENGER_ID) 
+FROM TICKETS GROUP BY ROUTE_CODE, FLIGHT_DATE 
+HAVING (COUNT(\*)/COUNT(DISTINCT PASSENGER_ID)) > 1
+
+19. Find all the information about the passenger who has bought the largest number of tickets.
+
+SELECT * FROM PASSENGERS WHERE ID IN 
+(SELECT PASSENGER_ID FROM TICKETS 
+GROUP BY PASSENGER_ID HAVING COUNT(\*) >= 
+ALL(SELECT COUNT(\*) FROM TICKETS 
+GROUP BY PASSENGER_ID))
+
+20. Find the route that sold the largest number of tickets on any one day.
+
+SELECT ROUTE_CODE, FLIGHT_DATE FROM TICKETS 
+GROUP BY ROUTE_CODE, FLIGHT_DATE 
+HAVING COUNT(\*) >= ALL (SELECT COUNT(\*) 
+FROM TICKETS GROUP BY ROUTE_CODE,FLIGHT_DATE)
+
+21. The airplanes that flew during 2014, when were they built?
+
+SELECT BUILD_DATE FROM AIRPLANES, TICKETS 
+WHERE AIRCRAFT_REGISTRATION=AIRCRAFT_ID 
+AND YEAR(FLIGHT_DATE)=2014 AND BUILD_DATE IS NOT NULL;
+
+22. How many passengers that were born in the 1970's have ever flown to Paris with this airline?
+
+SELECT COUNT(*) 
+FROM PASSENGERS P, ROUTES R, TICKETS T 
+WHERE ID=PASSENGER_ID AND 
+R.ROUTE_CODE=T.ROUTE_CODE AND 
+YEAR(BIRTH_DATE) BETWEEN 1970 AND 1979 
+AND DESTINATION='PARIS'
+
+23. What is the telephone number of the oldest passenger?
+
+SELECT TELEPHONE FROM PASSENGERS 
+WHERE BIRTH_DATE <= (SELECT MIN(BIRTH_DATE) 
+FROM PASSENGERS)
+
+24. How many airplanes have over 300 seats and do routes whose tickets are priced at 1000 euros or higher?
+
+SELECT COUNT(DISTINCT AIRCRAFT_ID) 
+FROM AIRPLANES A, ROUTES R, TICKETS T 
+WHERE AIRCRAFT_REGISTRATION=AIRCRAFT_ID AND 
+R.ROUTE_CODE=T.ROUTE_CODE 
+AND SEATS > 300 AND PRICE > 1000
+
+25. Find the tickets of all the flights to Toronto in aircraft built before 2010 and for passengers born after 2000
+
+SELECT TICKET_ID FROM PASSENGERS P, AIRPLANES A, ROUTES R, TICKETS T 
+WHERE AIRCRAFT_REGISTRATION=AIRCRAFT_ID AND ID=PASSENGER AND 
+T.ROUTE_CODE=R.ROUTE_CODE AND DESTINATION='Toronto' AND 
+BUILD_DATE < '01/01/2010' AND BIRTH_DATE > '12/31/2000'
+
+26. Find the routes whose price is lower than the average price of all routes taken together and which have the same origin.
+
+SELECT ROUTE_CODE FROM ROUTES 
+WHERE PRICE < ALL 
+(SELECT AVG(PRICE) FROM ROUTES 
+GROUP BY ORIGIN)
+
+27. For any origin and for tickets priced over 300 euros, how many tickets have been sold?
+
+SELECT ORIGIN,COUNT(*) 
+FROM ROUTES R, TICKETS T 
+WHERE T.ROUTE_CODE=R.ROUTE_CODE 
+AND PRICE > 300 GROUP BY ORIGIN
+
+28. What is the total amount of money that this airline has made from selling flights?
+
+SELECT SUM(PRICE) FROM TICKETS T, ROUTES R 
+WHERE T.ROUTE_CODE=R.ROUTE_CODE
+
+29. List the price of all tickets ordered by decreasing price.
+
+SELECT TICKET_ID,PRICE FROM TICKETS T, ROUTES R 
+WHERE T.ROUTE_CODE=R.ROUTE_CODE ORDER BY PRICE DESC
+
+30. Find out which passengers (with their telephone numbers) flew on route R7203 on the 28th December 2005 in aircraft that have over 300 seats.
+
+SELECT NAME, TELEPHONE FROM PASSENGERS,TICKETS,AIRPLANES 
+WHERE ID=PASSENGER_ID AND AIRCRAFT_REGISTRATION=AIRCRAFT_ID 
+AND ROUTE_CODE='R7203' AND FLIGHT_DATE='12/28/2005' AND SEATS>300
+
+
+Exercise 9.0
+
+We have two relational tables, **Employee** and **Department**, linked by a single foreign key. The relationship between **Employee** and **Department** is N:1. Represent the information contained in this relational model in JSON format.
+
+* Employee (EMPNO (PK), NAME, SALARY, DEPTNO (FK))
+
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+Employee <- matrix(c('1','John Miller','100','2','2','Walter White','70','5','3','Alonzo Church','125','4','4','Martin Harris','95','2'),ncol=4,byrow=TRUE)	
+
+Employee <- as.table(Employee)
+colnames(Employee) <- c('EMPNO','NAME','SALARY (100K)','DEPTNO')
+rownames(Employee) <- NULL
+
+knitr::kable(Employee)
+```
+
+* Department (DEPTNO (PK), DEPTNAME, LOCATION)
+
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+Department <- matrix(c('2','Marketing','Paris','4','Sales','Milan','5','R & D','New York'),ncol=3,byrow=TRUE)	
+
+Department <- as.table(Department)
+colnames(Department) <- c('DEPTNO','DEPTNAME','LOCATION')
+rownames(Department) <- NULL
+
+knitr::kable(Department)
+```
+
+### MongoDB Basic Commands
+
+
+https://towardsdatascience.com/8-examples-to-query-a-nosql-database-fc3dd1c9a8c
+
+
+Exercise 9.1{-} 
+
+\{ \
+  empno: 1, \
+  name: "John Miller", \
+  salary: 100, \
+  department: \{ deptno: 2, \
+                     deptname: "Marketing", \
+                     location: "Paris" \
+                    \} \
+\} \
+
+\{ \
+  empno: 2, \
+  name: "Walter White", \
+  salary: 70, \
+  department: \{ deptno: 5, \
+                     deptname: "R & D", \
+                     location: "New York" \
+                    \} \
+\} \
+
+\{ \
+  empno: 3, \
+  name: "Alonzo Church", \
+  salary: 125, \
+  department: \{ deptno: 4, \
+                     deptname: "Sales", \
+                     location: "Milan" \
+                    \} \
+\} \
+
+\{ \
+  empno: 4, \
+  name: "Martin Harris", \
+  salary: 95, \
+  department: \{ deptno: 2, \
+                     deptname: "Marketing", \
+                     location: "Paris" \
+                    \} \
+\}
