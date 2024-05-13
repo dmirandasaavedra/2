@@ -1,0 +1,126 @@
+
+## Solutions
+
+##### Exercise 6.1{-}
+This is by no means an exhaustive list, but it contains enough variety. You may also want to provide a full-lenght answer on an example you are familiar with.
+
+-Promotion and strategic placement of products throughout a store.
+
+-Development of *cross-selling* and *up-selling* strategies. Cross-selling is defined as the sale of additional products or services to an existing customer. Up-selling means offering the customer more expensive items or upgrades to generate extra revenue.
+
+-Launch of inbound marketing strategies on social networks, for example by sending out promotional coupons to customers for products related to items they recently bought.
+
+-Development of new products from combined functionalities.
+
+-Web clickstream analysis for website optimisation: the analysis of web logs can provide much knowledge on user behaviour, which can then be used to optimist websites and present pages that other users with similar behaviour have viewed (@AssociationRules_clickstreamData).
+
+-Inventory optimisation to decrease storage costs and optimise profits.
+
+-Complaints and customer reviews: these can be discretised and mined for associations with specific products, time of day or week, promotions and salespeople.
+
+-Fraud detection: credit card transaction datasets are mined to identify normal and abnormal patterns of behaviour.
+
+-In a medical setting rare combinations of symptoms can provide useful leads for doctors where the causes of a disease are not known, but a helpful treatment can be devised. For example, we may ask the following question: 'Which combination of symptoms can help anticipate muscle weakening in senior citizens?' By recognising specific combinations these patients may be put on specific programmes (e.g. mild exercise, diet) to proactively delay the onset of muscle weakening and thus prevent a number of associated health problems.
+
+##### Exercise 6.2{-}
+```{r, echo=TRUE, eval=TRUE}
+#In R
+
+if (!require("arules")) install.packages ("arules",
+dependencies=TRUE, repos='http://cran.us.r-project.org')
+
+library(arules)
+
+trans <- read.transactions("datasets/nomad.txt",format="single", cols=c(3,4), sep="\t", rm.duplicates=TRUE)
+summary(trans)
+
+```
+
+There are 24585 unique transactions in the dataset of which:
+
+-~39% (9510/24585) of transactions contain a single item.
+-~49% ((8133+ 3858)/24585) of transactions contain two or three items
+-Coffee is the most commonly sold item, followed by bread, cake, tea and ‘medialuna’.
+
+From this preliminary analysis we can hypothesise that most customers' main reason to visit the bakery is to have a ‘cuppa’ (with or without a cake/pastry) and also to buy their daily bread. We will use association rule mining to evaluate this hypothesis.
+
+##### Exercise 6.3{-}
+```{r, echo=TRUE, eval=TRUE}
+#In R
+
+itemFrequencyPlot(trans,topN=25,type="absolute",col="wheat2",xlab="Item name",ylab="Frequency (absolute)", main="The top 25 bakery products (ranked by absolute frequency)")
+
+itemFrequencyPlot(trans,topN=25,type="relative",col="wheat2",xlab="Item name",ylab="Frequency (relative)", main="The top 25 bakery products (ranked by relative frequency)")
+
+
+```
+
+First of all the relative frequency graph is particularly important because it helps us select the right *support* threshold for deriving any association rules. Here since the frequency of the top four products is about 0.5, 0.35, 0.2 and 0.14, if we set the support threshold as high as 0.1, the maximum number of rules we will ever be able to derive is four.
+
+In theory it is possible to extract all rules if you set the support and confidence thresholds low enough. In practice, however, if you have too many items (as in long-tail businesses) the calculations will take too long. It is always much better to reason about the support and confidence thresholds that will give us a set of rules that we can comfortably handle.
+
+Therefore the first thing we should do is to get a feel for how many rules we obtain for various support and confidence  thresholds. For one thing, too few rules convey limited information, and too many rules with limited confidence are difficult to implement as well as of limited value. To do this, we can set six levels of support and investigate how many rules are derived for each level of support and each confidence threshold. Since we have 24585 unique transactions, this means that an association rule with a support of 10% must have at least 2459 instances of the antecedent item in the set of transactions:
+
+```{r, echo=FALSE, eval=TRUE}
+library(magrittr)
+libR <- matrix (c('2459','1230','246','123','25','13','3'),ncol=7,byrow=TRUE)
+
+libR <- as.table(libR)
+colnames(libR) <- c('10%','5%','1%','0.5%','0.1%','0.05%','0.01%')
+rownames(libR) <- NULL
+
+knitr::kable(libR, caption = 'Support level vs. the minimum number of transactions.') %>% kableExtra::kable_styling(latex_options = "HOLD_position")
+```
+
+Support levels 0.1%, 0.05% and 0.01% are not really representative for a transaction dataset of this size and a general (non-personalised) analysis, so we will test the model with support values 10%, 5%, 1% and 0.5%. Also bear in mind that low support thresholds (even if we have a large enough dataset), will be more prone to producing spurious associations that mean nothing. The definition of a spurious association is one such that the items co-occur with unexpected frequency in the data, but only do so by chance.  
+
+##### Exercise 6.4{-}
+An example of an spurious association could be the increasing size of the World’s population and the increasing amount of vodka that is being sold worldwide every year: both might be increasing over time but it is difficult to explain, for example, how drinking more vodka leads to higher fertility rates, or how newborn babies are responsible for driving increased vodka consumption. Low support thresholds tend to produce spurious associations.
+
+##### Exercise 6.10{-}
+The goal of association rule mining is to improve the effectiveness of marketing and sales tactics using customer data from sales transactions. The example with the bakery transaction data is limited to a single location. In this context *differential analysis* would involve doing the same analyses with certain variations provided that enough data are available:
+
+-On specific days (any rule standing out on Mondays only?)
+
+-In specific time frames (morning vs. afternoon)
+
+-By season of the year (when you have enough historical data)
+
+-By location for multiple shops (and especially with different clientele by age or ethnic origin, for example). 
+
+If we identify a rule that holds only in one store, or on a particular day of the week, then that is an interesting difference whose analysis might provide key insights upon A/B testing:
+
+-Is the arrangement/display of goods the reason for the difference?
+
+-Is the clientele truly different and thus offering new opportunities for cross-selling and up-selling?
+
+-Are specific scheduled events in the neighbourhood responsible for the difference?
+
+##### Exercise 6.12{-}
+Any offer you made from the analysis of association rule mining has a number of inherent risks:
+
+-An offer could be rejected because it does not appeal to the customer:
+
+Aa rule with a support of 1% requires 246 transactions in our dataset. If the confidence is not 100%, then less than 246 transactions out of the 24585 unique transactions will support that rule, so our historical chances are less than 246/24585. A bad recommendation among recurrent customers might have a negative effect, whereas the effect of a bad recommendation in a shop with a high turnover of customers (e.g. a coffee shop on Regent Street in London) will be more neutral and thus encourage trying new offers.
+
+-An offer could be rejected is the price tag is too high:
+
+The price element is a key part of the model that must be mentioned. The median ticket value of the transaction dataset is £6.30 (about $8.75). How would you feel if you spend £6 and you buy a recommendation that turns out to be £15 ?
+
+##### Exercise 6.15{-}
+The goal of association rule mining is to find individual IF-THEN rules that capture patterns in the data. While this is a descriptive exercise, the ultimate intellectual goal is to generalise the training data to make predictions on new data. The two most popular strategies for learning rule sets may be regarded as extensions of standard association rule algorithms like Apriori, and include *classification by association* (e.g. the CBA, CMAR, CPAR and FARC-HD algorithms) and *separate-and-conquer or covering algorithms* (e.g. the AQ, CN2, FOIL, RIPPER, OPUS algorithms) (reviewed in [@Overview_RuleLearning]). One advantage of predictive rule learning over more complex predictive methods such as Support Vector Machines is that they are *interpretable*. An interpretable model is one that we can inspect and understand how the predictions were calculated, and this is a very desirable quality, especially when making predictions in a medical context [@AssociationRules_medicalDiagnosis].
+
+##### Exercise 6.20{-}
+The main limitation of association rule mining is that it is a bit simplistic because it basically involves counting items and their associations. Still, association rule mining can provide key insights that can have an important effect on the entire business, from operations to finance and marketing and sales.
+
+-The Apriori algorithm is useful but simplistic.
+
+Although the Apriori algorithm simply counts, it is an essential heuristic without which we would not be able to infer association rules in real time. The brute-force approach for determining association rules (that is, in the absence of the Apriori algorithm) involves listing all possible association rules and computing the support and confidence for each rule, followed by pruning the rules that do not meet the threshold. The computational complexity of this approach is essentially exponential, and so already for a relatively modest number of items the computation becomes prohibitive. The Apriori heuristic simplifies the complexity of the problem by reducing the number of item-sets to consider from the principle that “if an item-set is rare, then all of its subsets must be rare too”. Still, the Apriori algorithm can be limiting with large inventories or when the support threshold is set too low. In this case, it would be possible to improve the Apriori algorithm and reduce the number of comparisons further by using advanced data structures, but it’s not worth the trouble as we will see below with Recommender Systems. Alternative algorithms for performing association rule mining include ECLAT (also included in the arules package) and FP-growth, but they are not inherently superior to Apriori. They simply employ different tricks to reduce the computational complexity of the starting problem, and they all are basically counting.
+
+Besides the simplicity of counting things, a second limitation of all these algorithms is that they are not attached to a sophisticated probabilistic model that would make a better assessment of the confidence in the rules. For analysing correlations between features other techniques like mutual information would probably make a stronger case. These methods also lack the ability to learn from experience  and recognise serendipitous associations like a latent variable model would do in a recommender system. Therefore, association rule mining can be regarded as a primitive form of a recommender system. 
+
+-Association rule analysis is not personalised.
+
+The unit of analysis in association rule mining is the transaction. It does not matter who the customer is or their past purchase history. If two separate customers buy bread and milk, they will get the same recommendations regardless of what they have bought in the past.
+
+Having a granular understanding of each customer in the retail industry is possible thanks to loyalty cards, for instance, and personal information adds a whole new level of sophistication to customer recommendations.
