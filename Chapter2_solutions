@@ -1,0 +1,92 @@
+## Solutions
+
+##### Exercise 2.1{-}
+Some of the data sources that we might have to integrate to understand the effect of a drug during a clinical trial include: (i) anonymised patient data from various hospitals (structured data but perhaps in different formats); (ii) patient interview data to understand how they feel (might include unstructured text that needs to be transformed); and (iii) data from social networks (unstructured) to understand whether a correspondance exists between the sentiments observed during the interviews and those reported on social networks. 
+
+##### Exercise 2.2{-}
+Some questions that you should ask as part of a data collection strategy include:
+
+1. What datasets should be acquired for this project? Why are they relevant?
+
+2. What is the difference between the various available datasets and can I explain how each one helps answer each question in this project?
+
+3. When should we acquire these datasets?
+
+4. How complex is the data import process? Can I easily build a pipeline to extract data from various data repositories, or will I require the help of a data engineer? 
+
+5. Can I build a map of the data import process and the tools required at each step and how these should be prioritised? 
+
+6. If the data is available at a remote server, is there an API available to perform the data extraction or will I have to build my own?
+
+7. Will I have to scrape the data from a website? Is scraping that website legal?
+
+8. Where will I store the data? In raw or processed format and what are the implications of each?
+
+9. How long will I need the raw/processed data for, and are they uniquely used for this project?
+
+10. What implications are there to storing this or that dataset of size X over the next few months or years?
+
+##### Exercise 2.3{-}
+
+An algorithm is a set of steps that describe how to solve a particular problem, such as sorting a set of numbers into increasing order. 
+
+The three characteristics of a good algorithm include **correctness** (solving the task intended without error), **efficiency** (the algorithm uses as little time and/or space as possible) and **interpretability** (can you easily understand how the algorithm generated those predictions?). At the other end of the spectrum, a model that cannot be interpreted easily must be **explained**.
+
+Note: Many modern algorithms such as Google's search service are so much more complex to the point where they should be rather described as *complex software systems* because they integrate many layers with many sub-algorithms, each of which is managed by teams of developers and scientists. 
+
+##### Exercise 2.4{-}
+
+  + **Accuracy** — how accurately does our data describe the real-world objects and events?
+
+  + **Completeness** — how much of the entire dataset is available?
+
+  + **Consistency** — if the data is distributed across multiple sites, is the data uniformly updated and quality-checked across such sites, and can this be verified?
+
+  + **Timeliness** - whether the time of data recording is useful for the question being asked.
+
+  + **Uniqueness** — how un-duplicated our data are.
+
+  + **Validity** — are values syntactically valid and within a realistic range?
+
+##### Exercise 2.5{-}
+
+1. Regression.
+
+2. Logistic regression.
+
+3. Feature selection.
+
+4. Dimensionality reduction.
+
+5. Clustering.
+
+6. Anomaly detection.
+
+7. Multi-category classification.
+
+8. Clustering.
+
+9. Anomaly detection.
+
+10. Recommendation engines.
+
+11. Reinforcement learning.
+
+There is often more than one algorithmic technique to answer a given question and we should not get locked up with a single approach. For example, many classification problems can be reformulated as regression. In fact, conclusions that are
+reached from multiple angles using different techniques are always more sound.
+
+##### Exercise 2.6{-} 
+
+The churn project example below with four different deliverables could be implemented in a Waterfall style if each step of the CRISP-DM framework is performed for each deliverable in parallel. The results for the four deliverables will be available all at once. This is called *horizontal slicing*.
+
+In *vertical slicing* each deliverable is completed one after another. Thus the delivery of results takes place at regular intervals and opportunity for feedback could be sought upon completing each deliverable. 
+
+Therefore, for a complex project CRISP-DM can be implemented both in a Waterfall-like as well as an Agile-like style: following CRISP-DM without frequent iterations while providing detailed plans for each phase as well as detailed reports is very close to a Waterfall process. But if CRISP-DM is implemented in a more flexible and less documentation-heavy manner while iterating quickly, this would be closer to an Agile approach.
+
+Data science projects are very rarely entirely predictable, and therefore a plan-driven (Waterfall) approach is often not superior to a more Agile approach where results are released more frequently and feedback regularly obtained from stakeholders. Therefore, relatively complex data science projects are more likely to benefit from an Agile-like style of management.
+
+```{r, out.width="100%", fig.cap="Waterfall vs. Agile", echo=FALSE, fig.align = 'center'}
+options(tinytex.verbose = TRUE)
+
+knitr::include_graphics("images/CRISP-DM_Waterfall_Agile.jpg")
+```
