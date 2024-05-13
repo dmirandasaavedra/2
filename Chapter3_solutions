@@ -1,0 +1,32 @@
+## Solutions
+
+##### Exercise 3.1{-}
+A reasonable classification is presented below.
+
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+vizMethods <- matrix(c('Dendrogram','Timeline','Histogram, bar chart','Dot distribution map','Network diagram','Radial map (radial tree)','Gantt chart','Scatter plot','Choropleth map','Matrix','Hyperbolic tree (hypertree)','Theme river','Heatmap','Cartogram','Tube map','Wedge stack graph','Sankey diagram','Treemap chart','Dasymetric map','Dependency graph','Icicle chart','','Marimekko chart','Contour line map','Alluvial diagram','','','Radar chart (spider chart)','Geospatial data map',''),ncol=5,byrow=TRUE)
+
+libR <- as.table(vizMethods)
+colnames(vizMethods) <- c('Hierarchical','Temporal','Multidimensional','Geospatial', 'Network')
+rownames(vizMethods) <- NULL
+
+knitr::kable(vizMethods,caption = 'Visualisation methods that tend to work with specific data types.')
+```
+
+##### Exercise 3.4{-}
+
+```{r, echo=FALSE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+interpretableAlgs <- matrix(c('Linear regression','Yes','Yes','Regression','Logistic regression','No','Yes','Classification','Trees','No','Some','Regression, Classification','Naïve Bayes','No','Yes','Classification'),ncol=4,byrow=TRUE)	
+
+libR <- as.table(interpretableAlgs)
+colnames(interpretableAlgs) <- c('Algorithm','Linear','Monotone','Task')
+rownames(interpretableAlgs) <- NULL
+
+knitr::kable(interpretableAlgs,caption = 'Some characteristics of interpretable algorithms.')
+```
