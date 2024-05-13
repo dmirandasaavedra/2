@@ -1,0 +1,539 @@
+## Solutions
+
+##### Exercise 5.1{-}
+
+MICE works by iteratively regressing each feature, inferring missing values using the rest of the features, and repeating this *m* times until convergence is reached. We may use the toy dataset in Table XXX on voting preferences as an example to illustrate the steps of the MICE algorithm:
+
+*Step 1:* the missing values in each variable (Age, Gender, Education, Income and Vote) are imputed with a simple method, such as mean or mode imputation. These imputed values really are 'placeholders' that will be substituted by better predictions in the following steps.
+
+*Step 2:* we focus on one variable at a time, such as Age. The imputed placeholder that we calculated for the missing value in the Age column (fourth row) is set back to missing (but the imputed placeholder values of the other variables remain in place). 
+
+*Step 3:* we now use one or more of the other (independent) variables to regress the Age column, which is the dependent variable. The type of regression model (linear, logistic, ridge, lasso, quantile, etc.) depends on the nature of the dependent variable.
+
+*Step 4:* The regression model is used to predict the missing value of the Age column. 
+
+*Step 5:* The Age variable with its set of observed and imputed values now becomes an independent variable together with Education, Income and Vote to regress Gender. Steps 2-4 are repeated for each variable that contains missing values while using the other (independent) variables to regress on it.
+
+At the end of steps 1-5 (one cycle) all missing values in the data frame will have been replaced by predictions from regression models. This process is iterated *m* times and the imputed values updated at the end of each cycle. After *m* cycles the final imputation values are retained. 
+
+```{r, out.width="150%", fig.cap="The steps of the MICE algorithm", echo=FALSE, fig.align = 'center'}
+options(tinytex.verbose = TRUE)
+
+knitr::include_graphics("images/MICEalgorithm.jpg")
+```
+
+**Advantages of multivariate imputation**
+
+##### Exercise 5.2{-}
+
+KNN imputation is a technique using the *K*-Nearest Neighbours algorithm to find similarities across records. It works by plotting the vector representing each record on an *n*-dimensional space, where *n* is the number of features. The closer two vectors are, using a predefined distance metric, the more similar the samples are. KNN Imputation uses the information on the *k* neighbouring samples to fill the missing information of the sample we are considering.
+
+KNN imputation is a simple and reliable approach for many real-life applications.
+
+##### Exercise 5.3{-}
+
+We can argue that although we may randomly choose which values to mask, a key question here is how many should we choose to mask and how will this condition the different imputation methods by giving them access to more or less data? 
+
+Next, introducing bias when testing the accuracy of imputation methods in this way is unavoidable. For example, using the root mean-square error (RMSE) as a measure of accuracy on the imputation of continuous data will favour methods that rely on conditional means, whereas using the mean absolute error (MAE) favours methods that impute with the conditional medians. For qualitative variables, using the percentage of correct predictions as a measure of accuracy favours methods that rely on the conditional modes for imputation. Thus, the effect of choosing any of these accuracy measures is that the association between variables is reinforced in an artificial manner. The end result is that the imputed values might be inadequate for follow-up analyses.
+
+##### Exercise 5.4{-}
+
+
+```{r, echo=TRUE, eval=TRUE, include=FALSE}
+
+options(tinytex.verbose = TRUE)
+
+library(dplyr)
+library(tibble)
+library(naniar)
+
+wines.df <- read.table("datasets/wines_v2.tsv",
+                       header=TRUE, sep="\t")
+dim(wines.df)  # [1] 178  13 - data frame size
+
+str(wines.df)
+summary(wines.df)
+
+```
+
+A quick inspection of the 178 x 13 data frame shows that there are three types of missing values: 'NA', '<NA>' and '?'. In total, 77 rows contain missing values:
+
+```{r, echo=TRUE, eval=TRUE}
+
+options(tinytex.verbose = TRUE)
+
+misVal.tb <- wines.df %>% 
+  rowwise() %>% 
+  filter(any(c(Alcohol,Malic_acid,Ash,Ash_alcalinity,Magnesium,
+               Total_phenols,Flavanoids,Nonflavanoid_phenols,
+               Proanthocyanins,Color_intensity,Hue,OD280.OD315,
+               Proline) %in% c(NA,'<NA>','NA',' ','?'))) 
+
+dim(misVal.tb)    # 77 rows contain missing values
+```
+The filter() function of the **dplyr** package ^[https://cran.r-project.org/web/packages/dplyr/index.html] was used above for subsetting the original data frame. As a result, the **misVal.tb** object is now a tibble - Tydiverse's version of the data frame that has many advantages. However, unlike a data frame a tibble only displays the top 10 rows by default. To view all 45 rows that contain missing values we must include an instruction like the following:
+
+```{r, echo=TRUE, eval=TRUE}
+options(dplyr.print_max = 1e6)
+```
+Before proceeding with any further analysis we have to recode all types of missing values to NAs:
+```{r, echo=TRUE, eval=TRUE}
+wines.tb <- replace_with_na_all(wines.df, condition = ~.x %in% c(NA,'<NA>','NA',' ','?'))
+```
+Inspection of the **wines.tb** tibble shows the conversion of all different types of missing values to NAs (not shown). The percentage of missing values per attribute ranges from 1.69% (Proanthocyanins) to 6.74% (Nonflavanoid_phenols).
+```{r, echo=TRUE, eval=TRUE, warning=FALSE}
+miss_var_summary(wines.tb)
+
+# Missingness in variables, ordered
+gg_miss_var(wines.tb)
+```
+The visualisation of the missing data shows that overall 4.0% of the data points are missing, and suggests that the pattern of missingness might be random, without evident clusters. When exploring the combinations of missingness amongst variables we do not find significant, abundant correlations (which are characteristic of MAR).
+```{r, echo=TRUE, eval=TRUE, warning=FALSE}
+# Summary of missingness
+vis_miss(wines.tb)
+
+# Exploring the combinations of missingness
+gg_miss_upset(wines.tb)
+```
+
+##### Exercise 5.5{-}
+
+To determine whether the missing data are *missing completely at random* (MCAR) we can perform Little's test where the null hypothesis is that the missing data is MCAR. Here, a p-value > 0.05 indicates a failure to reject the null hypothesis and therefore we may conclude based on Little's test that no specific pattern exists in the missing data (i.e. is likely MCAR). 
+```{r, echo=TRUE, eval=TRUE}
+mcar_test(wines.tb)
+```
+Little's test is only one type of indication on the nature of missing values, and even if the null hypothesis is confirmed, this must be taken with caution as the MCAR assumption is only likely to be true in situations where the data is missing due to some truly random phenomena.
+
+
+##### Exercise 5.6{-}
+
+'Under the assumption of MAR or MCAR, standard implementations of multiple imputation methodology can be used; this has substantial advantages, as it allows missing data to be handled in a way that is unbiased and statistically valid.' (Bhaskaran, K. and Smeeth, L. (2014))
+
+```{r, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, results='hide'}
+
+library(mice)
+
+# We must check that all columns are numeric 
+# with is.numeric()
+# We then convert those stored as character to numeric
+
+wines.tb$Total_phenols <- as.numeric(wines.tb$Total_phenols)
+wines.tb$Malic_acid <- as.numeric(wines.tb$Malic_acid)
+
+imputed_wines <- mice(wines.tb, m=5, maxit = 50, 
+                      method = 'pmm', seed = 500)
+```
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+
+summary(imputed_wines)
+imputed_wines$imp$Magnesium
+```
+The output shows the imputed data for each observation (first column left) within each imputed dataset (first row at the top).
+
+```{r, echo=TRUE, eval=TRUE}
+
+head(complete(imputed_wines, 3))
+```
+
+##### Exercise 5.7{-}
+
+
+
+https://machinelearningmastery.com/handle-missing-data-python/
+
+##### Exercise 5.3.ex1{-}
+
+The following code shows that this dataset contains 10000 observations of three different 
+variables (height, weight and gender). We separate the original dataset into male and female 
+datasets because men and women have different ranges for height and weight, and therefore different 
+measures of central tendency and variability. Not separating the original dataset by gender will 
+distort the identification of outliers.
+```{r, echo=TRUE, eval=TRUE,warning=FALSE, message=FALSE, results='hide'}
+library(tidyverse)
+df <- read.csv("datasets/weight-height.csv", 
+               stringsAsFactors = FALSE)
+```
+
+We split the original dataset by gender and see that males, females and everyone put together have different means, medians and ranges. The dataset contains weight and height data for 5000 women and 5000 men.
+
+```{r, echo=TRUE, eval=TRUE,warning=FALSE, message=FALSE, results='hide'}
+str(df)
+unique(df$Gender)
+
+male <- df[which(df$Gender == "Male"),]
+male$Gender <- NULL
+dim(male)
+
+female <- df[which(df$Gender == "Female"),]
+female$Gender <- NULL
+dim(female)
+
+summary(df)
+summary(male)
+summary(female)
+```
+Before proceeding with the identification of outliers we must find out the **type of distribution**
+of these datasets. This is because the definition of an outlier is made with reference to a 
+particular type of distribution (@davies1993). The *normal distribution* is the default choice for 
+most outlier detection techniques where outliers are defined as being unusually far away from 
+the bulk of the data, an expectation that is formalised precisely in a normally distributed 
+dataset.
+
+To assess the degree of normality of the men and women height and weight datasets we can use a *visual inspection test* 
+(for example, a quantile-quantile plot), and a *statistical test* (the Shapiro-Wilk normality test).
+
+```{r, echo=TRUE, eval=TRUE}
+
+# Q-Q plot
+
+library(ggpubr)
+
+mh <- ggqqplot(male$Height,title="Male, height")
+mw <- ggqqplot(male$Weight,title="Male, weight")
+
+fh <- ggqqplot(female$Height,title="Female, height")
+fw <- ggqqplot(female$Weight,title="Female, weight")
+
+ggarrange(mh, mw, fh, fw, labels = c("A","B","C","D"), ncol=2, nrow=2)
+
+```
+In the case of the Q-Q plots, the data points of all four datasets follow very closely the 
+reference line of a normally distributed set of scores with the same mean and standard 
+deviation, and therefore we can assume normality. Note that the grey area extending either side of the reference line illustrates a theoretically acceptable deviation from this line of 
+normality.
+
+The problem with the visual inspection of datasets is that it can be unreliable and does not 
+guarantee that the distribution is normal. We can use the **mshapiro.test()** function of the **mvnormtest** package ^[https://cran.r-project.org/web/packages/mvnormtest/index.html] to test for statistical normality in our multivariate setting. 
+
+The results of Shapiro-Wilk multivariate normality test on the male and female datasets produce p-values > 0.05. Since the null hypothesis (Ho) is that the distribution of data is multivariate normal, the large p-values fail to reject the null hypothesis, which means that the distribution of our data is not significantly different from the normal distribution.
+```{r, echo=TRUE, eval=TRUE}
+
+# Shapiro-Wilk test
+library(mvnormtest)
+mshapiro.test(t(male))
+mshapiro.test(t(female))
+
+```
+The Shapiro-Wilk test has the advantage over the Kolmogorov-Smirnov (K-S) test that it is not as sensitive to duplicate data. Other statistical tests for normality include the Anderson-Darling test, the D’Agostino skewness test, the Cramer-von Mises test and the Lilliefors corrected K-S test, among others (reviewed in @ghasemi2012, @das2016 and more extensively in @aggarwal_outliers).
+
+We now identify outliers using the boxplot technique.
+```{r, echo=TRUE, eval=TRUE}
+
+plotA <- ggplot(male, aes(x=Height)) +
+  geom_boxplot(outlier.colour="red", outlier.shape=5, outlier.size=3) +
+  labs(title = "Height (males)")
+  
+plotB <- ggplot(male, aes(x=Weight)) +
+  geom_boxplot(outlier.colour="red", outlier.shape=5, outlier.size=3) +
+  labs(title = "Weight (males)")
+  
+plotC <- ggplot(female, aes(x=Height)) +
+  geom_boxplot(outlier.colour="red", outlier.shape=5, outlier.size=3) +
+  labs(title = "Height (females)")
+  
+plotD <- ggplot(female, aes(x=Weight)) +
+  geom_boxplot(outlier.colour="red", outlier.shape=5, outlier.size=3) +
+  labs(title = "Weight (females)")
+
+ggarrange(plotA, plotB, plotC, plotD, labels = c("A","B","C","D"), ncol=2, nrow=2)
+```
+The limits of the box in the boxplot are the 25th (first quartile or Q1) and the 75th percentiles (third quartile or Q3). Q1 and Q3 define the middle 50% of the data, also called the interquartile range (IQR). An outlier in the context of a boxplot (represented here as red triangles) is a value that falls outside the whiskers of the boxplot. The top whisker ends at Q3 plus 1.5 x IQR whereas the bottom whisker ends at Q1 minus 1.5 x IQR.
+
+According to this definition there are 46 outliers for both male height and weight, 27 outliers for female height and 28 outliers for female weight.
+
+```{r, echo=TRUE, eval=FALSE}
+
+length(boxplot.stats(male$Height)$out)    # 46
+length(boxplot.stats(male$Weight)$out)    # 46
+length(boxplot.stats(female$Height)$out)  # 27
+length(boxplot.stats(female$Weight)$out)  # 28
+```
+
+##### Exercise 5.3.ex2{-}
+
+To determine the z-scores and percentiles defined by the boxplot analysis we must first determine the plot's lower and upper cutoff values.
+```{r, echo=TRUE, eval=TRUE}
+
+summary_mh <- summary(male$Height)
+Q1 <- unname(summary_mh[2])
+Q3 <- unname (summary_mh[5])
+boundaries <- c(Q1 - 1.5*IQR(male$Height), Q3 + 
+                  1.5*IQR(male$Height))
+
+# upper and lower cutoff values are 61.45358 and 76.70984
+
+# We can now calculate the z-score using the formula 
+# z = (value - mean) / sd and the percentile using
+# the pnorm() function
+
+z_lower = (boundaries[1] - mean(male$Height))/ sd(male$Height)
+z_upper = (boundaries[2] - mean(male$Height))/ sd(male$Height)
+
+# z_lower is -2.64
+# z_upper is 2.68
+
+perc_lower = pnorm(z_lower)
+perc_upper = pnorm (z_upper)
+
+# perc_lower and perc_upper are both ~0.99 
+```
+
+##### Exercise 5.3.ex3{-}
+
+Grubb's and Dixon's Q tests are both univariate outlier tests designed to consider individual values in normally distributed populations. For example, Grubb's test determines whether the largest or the smallest data point is an outlier, the null hypothesis being that the value in question is *not* an outlier (@grubbs_1950). Like Grubb's test, Dixon's Q test is from the early 1950's (@dixon_1951) when the detection of single, isolated outliers was the norm as the underlying motivation simply was to cleanse the data so that parametric statistical models could fit the training data more smoothly (@boukerche_2020). The boxplot, on the other hand, takes a more pragmatic approach in trying to identify any data point that is sufficiently different from the bulk of the data. Moreover, the Grubb and Dixon tests are not particularly robust because extreme values will break down the mean and standard deviation used in Grubb's test, or the order statistics of Dixon's Q test.
+
+Therefore, Rosner's test is the better choice for the identification of outliers. This is because it is designed to detect multiple outliers at once as well as to avoid the problem of *masking* (where two proximal outliers mask one another) (@rosner_1983). For executing Rosner's test we can specify the number of suspected outliers as previously determined by the boxplot technique. Interestingly, the boxplot and the Rosner test disagree as the latter cannot identify a single outlier in the male or female datasets.
+
+```{r, echo=TRUE, eval=TRUE,warning=FALSE, message=FALSE}
+if (!require("EnvStats")) install.packages ("EnvStats",
+dependencies=TRUE, repos='http://cran.us.r-project.org')
+
+library(EnvStats)
+
+mh_rosner <- rosnerTest(male$Height, k = 46)
+mw_rosner <- rosnerTest(male$Weight, k = 46)
+
+fh_rosner <- rosnerTest(female$Height, k = 27)
+fw_rosner <- rosnerTest(female$Weight, k = 28)
+
+# We show the first six rows of result of the Rosner test on 
+# the female heights dataset for illustration
+
+head(fh_rosner$all.stats)
+```
+##### Exercise 5.3.ex4{-}
+
+LRD (B) = 1/4.5 = 0.222
+
+LRD (C) = 1/3.5 = 0.286
+
+LRD (D) = 1/5 = 0.200
+
+LRD (E) = 1/4.5 = 0.222
+
+##### Exercise 5.3.ex5{-}
+
+LOF (B) = mean (1.289,1.289) = 1
+
+LOF (C) = mean (1,0.776) = 0.888
+
+LOF (D) = mean (1.43,1.11) = 1.27
+
+LOF (E) = mean (1.288,0.901) = 1.0945
+
+##### Exercise 5.3.ex6{-}
+
+(Determine the number of outliers for both males and females using the LOF algorithm. Produce a density plot of the outliers against the distribution of the LOF scores. Also determine the number of outliers for a LOF cutoff scores 1.0, 1.1, 1.2 and 1.3.)
+
+
+```{r, echo=TRUE, eval=TRUE}
+library(dbscan)
+
+# male
+male_scaled <- as.data.frame(scale(male))
+male_lof <- male
+male_lof$lof_score <- lof (male_scaled, minPts=15)
+mplot <- ggdensity(male_lof,x="lof_score", xlab="LOF score", ylab="Density", title="Males")
+
+# female
+female_scaled <- as.data.frame(scale(female))
+female_lof <- female
+female_lof$lof_score <- lof (female_scaled, minPts=15)
+fplot <- ggdensity(female_lof,x="lof_score", xlab="LOF score", ylab="Density", title="Females")
+
+ggarrange(mplot,fplot, labels = c("A","B"), ncol = 1, nrow = 2)
+```
+
+Number of outliers for LOF cutoff scores 1.0, 1.1, 1.2 and 1.3:
+
+```{r, echo=TRUE, eval=FALSE}
+dim(subset(male_lof, lof_score >= 1.0))  # 3336 outliers
+dim(subset(male_lof, lof_score >= 1.1))  # 479 outliers
+dim(subset(male_lof, lof_score >= 1.2))  # 479 outliers
+dim(subset(male_lof, lof_score >= 1.3))  # 84 outliers
+
+dim(subset(female_lof, lof_score >= 1.0)) # 3307 outliers
+dim(subset(female_lof, lof_score >= 1.1)) # 487 outliers
+dim(subset(female_lof, lof_score >= 1.2)) # 179
+dim(subset(female_lof, lof_score >= 1.3)) # 101 outliers
+
+```
+
+##### Exercise 5.3.ex7{-}
+
+(Different methods identify different sets of outliers on this dataset. For instance, the boxplot method identified 46 outliers in the male dataset (both for height and weight) and 27 and 28 outliers for female height and weight, respectively. Rosner's test identified none, and the LOF algorithm identified 691 and 735 outliers in males and females when using the theoretically recommended cutoff of 1.1.)
+
+(Discuss how you would identify the real outliers and whether these should be discarded.)
+
+First of all outliers should be rare, and if they are frequent then either the outlier prediction method needs adjusting, or the experiment or recording method is producing unreliable results. A blind approximation to detect the real outliers is to run different outlier detection methods and expect some kind of overlap among the predicted outliers. Here we can hypothesize that the real outliers should be identifiable by more than one method.
+
+However, since there is no fixed definition of what an outlier is (other than a data point that is substantially different from the bulk of the data) a more sensible approach is to inspect individual outliers in the context of the experiment and the data collection mechanisms. Not all outliers are equally extreme and their inspection can reveal important truths about the experiment and be informative as to whether an outlier is genuine or non-genuine. Consider the following questions:
+
+-Can any of these outliers possibly originate under the given experimental conditions?
+
+-Can the outliers result from a malfunctioning process or a data recording problem?
+
+-Can we replicate the experiment and still observe the same set of outliers?
+
+Answering these question will help us determine whether a data point is an outlier, as well as whether it is a genuine outlier or not. Non-genuine outliers should be discarded and their origin investigated to determine how often we can expect these values to appear in our data. In the absence of experimental and recording problems, genuine outliers are part of the story and can be very interesting scientifically. Still, should we exclude genuine outliers? 
+
+The decision to exclude genuine outliers depends on a number of factors. For example, genuine outliers in small samples can have a considerable impact. And do we really want to exclude them from skewed distributions? Removing outliers in skewed distributions can introduce even more bias since outliers tend to accumulate in the direction of the tail. 
+
+Also, what is the follow-up analysis? Some statistical methods such as ranked tests and decision trees are robust to outliers, whereas the modelling of our dataset by something as common and useful as linear regression can be seriously affected by outliers. This is for example clearly illustrated by the third dataset of Anscombe's quartet where a single outlier substantially changes the slope of the linear regression line (@anscombe). Whenever we suspect that genuine outliers can seriously affect the ability of our model to generalise (even though such outliers are part of the story) we must built alternative models with and without outliers. 
+
+##### Exercise 5.3.ex8{-}
+
+(Build a base model to predict male weight from height using the entire **weight-height.csv** dataset. Then use the Cook's Distance metric to improve upon the base model by removing influential data points. What is an appropriate cutoff for identifying these influential data points? What does your chosen cutoff tell you?)
+
+First of all we need to determine what type of relationship the height and weight variables hold. We can see that they are linearly related:
+
+```{r, echo=TRUE, eval=TRUE}
+
+ggplot(male_lof, aes(Height, Weight)) +
+  geom_point() +
+  xlab("Height") +
+  ylab("Weight") +
+  ggtitle("Height versus weight in males")
+
+```
+
+Since the weight and height variables hold an approximately linear relationship it is reasonable to build a linear regression model to try to predict weight from height. We first use all of the data for males (5000 rows) and then discard outliers according to the Cook's Distance metric.
+
+```{r, echo=TRUE, eval=TRUE}
+## Linear model with all male weight and height data points (5000 rows)
+
+model0 <- lm(Weight ~ Height, data = male_lof)
+```
+
+We can visualise the Cook's Distance outliers with a bar plotting function included in the **olsrr** package (R). The default cutoff value of the **ols_plot_cooksd_bar()** function for detecting putative outliers is the value of four times the average Cook's Distance.
+
+```{r, echo=TRUE, eval=TRUE}
+library(olsrr)
+ols_plot_cooksd_bar(model0)
+```
+
+Data points that have a Cook's Distance greater than four times the average distance are typically classified as influential, but we should explore other cutoffs as this is not a hard boundary.
+
+```{r, echo=TRUE, eval=TRUE}
+# Identification of influential values by Cook's Distance for various cutoffs
+
+cooksd <- cooks.distance(model0)
+
+influential_1mean <- cooksd[(cooksd > (1 * mean(cooksd, na.rm = TRUE)))]
+influential_2mean <- cooksd[(cooksd > (2 * mean(cooksd, na.rm = TRUE)))]
+influential_3mean <- cooksd[(cooksd > (3 * mean(cooksd, na.rm = TRUE)))]
+influential_4mean <- cooksd[(cooksd > (4 * mean(cooksd, na.rm = TRUE)))]
+influential_5mean <- cooksd[(cooksd > (5 * mean(cooksd, na.rm = TRUE)))]
+
+length(influential_1mean)   # 1357 influential data points
+length(influential_2mean)   # 684 influential data points
+length(influential_3mean)   # 388 
+length(influential_4mean)     # 250
+length(influential_5mean)     # 170
+
+```
+
+Different cutoff values produce different sets of influential values. We can now build various linear models where different sets of influential values are removed and empirically determine which model is more robust.
+
+```{r, echo=TRUE, eval=TRUE}
+
+names1 <- names(influential_1mean)
+outliers1 <- male_lof[names1,]
+male_lof_cutoff_1mean <- male_lof %>% anti_join(outliers1)
+model1 <- lm(Weight ~ Height, data = male_lof_cutoff_1mean)
+
+names2 <- names(influential_2mean)
+outliers2 <- male_lof[names2,]
+male_lof_cutoff_2mean <- male_lof %>% anti_join(outliers2)
+model2 <- lm(Weight ~ Height, data = male_lof_cutoff_2mean)
+
+names3 <- names(influential_3mean)
+outliers3 <- male_lof[names3,]
+male_lof_cutoff_3mean <- male_lof %>% anti_join(outliers3)
+model3 <- lm(Weight ~ Height, data = male_lof_cutoff_3mean)
+
+names4 <- names(influential_4mean)
+outliers4 <- male_lof[names4,]
+male_lof_cutoff_4mean <- male_lof %>% anti_join(outliers4)
+model4 <- lm(Weight ~ Height, data = male_lof_cutoff_4mean)
+
+names5 <- names(influential_3mean)
+outliers5 <- male_lof[names5,]
+male_lof_cutoff_5mean <- male_lof %>% anti_join(outliers5)
+model5 <- lm(Weight ~ Height, data = male_lof_cutoff_5mean)
+
+# We can also build a sixth model by subtracting the putative outliers
+# that have a LOF score up to 1.1 (n=479)
+
+male_cutoff_lof1.1 <- subset(male_lof, lof_score <= 1.1)
+model6 <- lm(Weight ~ Height, data = male_cutoff_lof1.1)
+
+# Which model has the best R-squared?
+
+# summary(model0)   R^2 = 0.7447
+# summary(model1)   R^2 = 0.8543
+# summary(model2)   R^2 = 0.7998
+# summary(model3)   R^2 = 0.7742
+# summary(model4)   R^2 = 0.761
+# summary(model5)   R^2 = 0.7742
+# summary(model6)   R^2 = 0.7804
+
+```
+
+We can see how the R-squared of the base model (0.7447) can be substantially improved by deleting any data point that is simply larger than the average Cook's Distance (model1, R-squared = 0.8543). This is a harsh (but not unheard of) cutoff as by applying it we get rid of 1357/5000 data points (~27%). Without investigating the original dataset we cannot tell much more - perhaps there are some non-genuine outliers (such as data entry errors), in which case it would be worth trying to get hold of the original data questionnaires. 
+
+In observational research it is not easy to sample uniformly across the predictor space. Thus, it could also be possible that the influential values are genuine and that the population is not as homogeneous as we would like to: think of a combination of males with a healthy body-mass index (BMI) and males with more extreme BMI values which, when removed, help improve the resulting model. 
+There is no Cook's Distance cutoff value that is universally applicable and we should be cautious and keep an open mind. We can, for example, combine outlier detection at various cutoffs with model building and visualisation using the Cook's Distance bar plot shown above to examine in closer detail the data points that appear to be substantially different.
+
+##### Exercise 5.3.ex9{-}
+
+(Compare the base model and the improved model side-by-side by discussing appropriate metrics.)
+
+##### Exercise 5.3.ex10{-}
+
+(What assumptions are made in linear regression?)
+
+##### Exercise 5.3.ex11{-}
+
+(You have to drive from Istanbul to Antalya (700 km). Your copilot says *'Oh, it's such a long and boring ride. If we travel at a speed of 100 Km/h we will be there in 7 hours, but at a speed of 200 Km/h it will be only 3.5 hours, so let's speed up*. What is wrong with this line of reasoning?)
+
+The copilot is assuming that because we can cover the distance in 7 h when travelling at 100 Km/h, and in 3.5 h when travelling at 200 Km/h there is a linear relationship between time and speed. However, if we plot time vs speed we can clearly see that their relationship is non-linear:
+
+```{r, echo=TRUE, eval=TRUE}
+
+library(ggplot2)
+
+# First for a standard set of distances we calculate the time it takes
+# to travel the 700 Km gap between Istanbul and Antalya
+
+xval <- c(50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200)
+yval <- c()
+dist <- c(700)
+
+for (p in xval) {
+  newval <- dist/p
+  yval <- c(yval,newval)
+}
+
+df <- data.frame(xval,yval)
+
+# A line plot
+
+ggplot(data=df, aes(x=xval, y=yval)) +
+  geom_line() +
+  geom_point() +
+  xlab("Speed (Km/h)") +
+  ylab ("Time (h)")
+    
+```
+
+This is an example of cognitive bias as our brains prefer to think in linear terms (because it is easier) and a major limitation of linear regression that is nevertheless exploited in marketing campaigns. We must always be aware that not every situation is linear or else we are bound to making poor decisions. The question we should be asking instead is not how much we can speed up but how much time we would be saving by speeding. If we calculate various travelling times as a function of distance and speed (Time = Distance / Speed) we can see that speeding from 100 Km/h to 130 Km/h will save us ~1.61 h (~97 min):
+
+Time = 700 Km / 130 Km/h ~ 5.38 h
+
+However, increasing our speed from 130 Km/h to 160 Km/h will not save us 194 min but only 157.5 min:
+
+Time = 700 Km / 160 Km/h ~ 4.375 h (2.625 h difference ~ 157.5 min)
+
+Therefore excessive speeding brings diminishing returns in terms of travel time saved while greatly increasing our risk of being injured in an accident as well as causing damage to other vehicles and property. This is because the risk of injury increases exponentially (not linearly) with impact speed (@road_safety).
