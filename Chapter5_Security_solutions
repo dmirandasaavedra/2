@@ -109,6 +109,17 @@ Despite seeming secure, the password is made up of very common words that may be
 
 For this reason Bruce Schneier's recommendation is to choose a sentence that you can easily remember and transform it in a non-obvious way ^[https://t.ly/jaTtS]. For example if we mutate the sentence 'when I was seven, my sister threw my stuffed rabbit in the toilet' to 'WIw7,mstmsritt...', and assume a 78-character alphabet then the latter password has an entropy of nearly 107 bits (log~2~(78^17^)).
 
+#### Exercise 5.71 
+a) Users are assigned or removed to/from roles.
+-> Update role list.
+b) New files must be created with an initial role assignment.
+-> Create new file and update ACE list.
+c) Access rights of a resource change.
+-> Update ACE list.
+d) Certain roles must be removed, merged or split.
+->Update role list and ACE list.
+
+
 ##### Exercise 5.6{-}
 An email password needs to be more complex because it only fulfils the *what you know* identification factor, whereas the PIN for your ATM card combines *what you have* (the card) and *what you know* (the 4-digit PIN). In theory this gives a thief a chance of 3/10000 if the card gets swallowed after three failed attempts. In practice, however, the chances for the attacker are even better because of our own behavioural bias when choosing short passwords: Research on a database of 3.4M exposed passwords showed that the choice of 4-digit passwords never follows an even distribution as '1234' is chosen by 10.7% of users, followed by '1111' (6.0%) and '0000' (1.9%) (@PINanalysis). This behavioural bias favours the attackers, although in practice having a 4-digit password and the card swallowed after three failed attempts is a good compromise between a secret that is short enough to be recalled and something that is rather secure.
 
